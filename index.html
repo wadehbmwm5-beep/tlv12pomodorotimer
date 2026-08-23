@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- ضع هذا السطر داخل الـ <head> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <title>Study with خلاصة</title>
+    <meta name="theme-color" content="#050505">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%8F%B3%3C/text%3E%3C/svg%3E">
+
+    <!-- دعم "أضِف للشاشة الرئيسية" حتى يفتح بدون شريط سفاري ويبدو كتطبيق مستقل (يساعد الاستمرارية لكنه لا يلغي قيود نظام iOS بإيقاف الجافاسكربت عند قفل الشاشة) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="خلاصة">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23050505'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle'%3E%E2%8F%B3%3C/text%3E%3C/svg%3E">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIlN0dWR5IHdpdGgg2K7ZhNin2LXYqSIsICJzaG9ydF9uYW1lIjogItiu2YTYp9i12KkiLCAic3RhcnRfdXJsIjogIi4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImJhY2tncm91bmRfY29sb3IiOiAiIzA1MDUwNSIsICJ0aGVtZV9jb2xvciI6ICIjMDUwNTA1IiwgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0In0=">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+
+        :root {
+            --deep-gold: #c5a059;
+            --light-gold: #f1d38e;
+            --break-blue: #3498db;
+            --bg-black: #050505;
+            --card-bg: rgba(18, 18, 18, 0.9);
+            --border-color: rgba(197, 160, 89, 0.2);
+            --pause-color: #e67e22;
+            --surrender-color: #e74c3c;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-black); color: #fff;
+            font-family: 'Tajawal', sans-serif; margin: 0;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 100vh; padding: 20px; 
+            overflow-x: hidden;
+        }
+
+        #snowCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.4; }
+
+        .top-nav {
+            position: fixed; top: 20px; right: 20px;
+            display: flex; gap: 10px; z-index: 100;
+        }
+
+        .nav-btn {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            color: var(--light-gold); width: 45px; height: 45px;
+            border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            transition: 0.3s;
+        }
+        .nav-btn:hover { border-color: var(--deep-gold); transform: scale(1.1); }
+
+        .sidebar {
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
+            background: var(--card-bg); backdrop-filter: blur(25px);
+            border-left: 1px solid var(--border-color); z-index: 100;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column;
+        }
+        .sidebar.active { right: 0; }
+        .sidebar-header { 
+            font-weight: 900; color: var(--light-gold); font-size: 1.3rem; 
+            margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .close-sidebar { cursor: pointer; font-size: 1.5rem; color: #fff; }
+        
+        .history-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+        .history-item { 
+            background: rgba(255,255,255,0.03); margin-bottom: 10px; padding: 12px; 
+            border-radius: 12px; border-right: 4px solid var(--deep-gold);
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;
+        }
+        .history-item small { color: #999; display: block; margin-top: 4px; }
+
+        .reset-btn {
+            background: rgba(231, 76, 60, 0.1); color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3); padding: 12px;
+            border-radius: 12px; font-family: 'Tajawal'; font-weight: bold;
+            cursor: pointer; margin-top: 15px; transition: 0.3s; font-size: 0.85rem;
+        }
+
+        .custom-modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px;
+            border-radius: 25px; z-index: 250; width: 92%; max-width: 380px; text-align: center;
+            backdrop-filter: blur(25px); box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        }
+        
+        .rank-list { max-height: 400px; overflow-y: auto; margin-bottom: 15px; padding: 5px; }
+        .leaderboard-meta { margin: 0 0 15px 0; padding: 12px; border-radius: 15px; background: rgba(255,255,255,0.04); color: #cfcfcf; font-size: 0.85rem; }
+        .leaderboard-meta strong { color: var(--light-gold); }
+        .online-badge { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); padding: 8px 15px; border-radius: 15px; font-weight: bold; font-size: 0.9rem; margin-bottom: 15px; display: inline-block; box-shadow: 0 0 10px rgba(46, 204, 113, 0.1); }
+        
+        .rank-item { display: flex; justify-content: space-between; padding: 14px; margin: 8px 0; border-radius: 15px; font-weight: bold; font-size: 0.95rem; background: rgba(255,255,255,0.04); transition: 0.3s; }
+        .rank-name { display: flex; align-items: center; gap: 8px; max-width: 72%; text-align: right; }
+        .rank-badge { min-width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); font-size: 0.85rem; }
+        .rank-time { color: inherit; white-space: nowrap; }
+        .rank-subtext { display: block; color: #9c9c9c; font-size: 0.75rem; margin-top: 3px; }
+        
+        .modal-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; border-radius: 14px; padding: 14px 16px; font-family: 'Tajawal'; font-size: 1rem; outline: none; margin: 5px 0 10px; }
+        .modal-input:focus { border-color: var(--deep-gold); }
+        .helper-text { color: #9c9c9c; font-size: 0.8rem; margin: 0 0 12px; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .modal-actions .action-btn { padding: 14px; flex: 1; }
+        .ghost-btn { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid #444; }
+        
+        .modal-title { font-size: 1.4rem; font-weight: 900; margin: 0 0 15px 0; }
+        .danger-text { color: #e74c3c; }
+
+        /* === واجهة تخصيص الوقت الحديثة === */
+        .time-picker-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px; margin-bottom: 14px; transition: 0.3s; }
+        .time-picker-block.disabled-block { opacity: 0.35; pointer-events: none; filter: saturate(0.4); }
+        .time-picker-label { font-weight: 700; font-size: 0.95rem; color: var(--light-gold); margin-bottom: 12px; text-align: right; }
+        .stepper-row { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 14px; }
+        .stepper-btn { width: 42px; height: 42px; min-width: 42px; border-radius: 50%; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--light-gold); font-size: 1.4rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .stepper-btn:active { transform: scale(0.88); background: rgba(197,160,89,0.18); }
+        .stepper-value { min-width: 110px; text-align: center; font-size: 1.8rem; font-weight: 900; color: #fff; font-family: 'Tajawal'; }
+        .stepper-value small { font-size: 0.85rem; font-weight: 500; color: #9c9c9c; margin-right: 4px; }
+        .preset-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .chip-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #ccc; padding: 7px 14px; border-radius: 30px; font-family: 'Tajawal'; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .chip-btn.active { background: var(--deep-gold); color: #1a1100; border-color: var(--deep-gold); }
+        .chip-btn:active { transform: scale(0.93); }
+
+        .shutdown-toggle-row { display: flex; align-items: center; justify-content: space-between; background: rgba(231,126,34,0.07); border: 1px solid rgba(231,126,34,0.25); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; cursor: pointer; transition: 0.2s; }
+        .shutdown-toggle-row:active { transform: scale(0.985); }
+        .shutdown-title { font-weight: 800; font-size: 0.92rem; color: #f2a766; }
+        .shutdown-sub { font-size: 0.74rem; color: #9c9c9c; margin-top: 3px; }
+        .switch-track { width: 48px; height: 27px; background: rgba(255,255,255,0.12); border-radius: 30px; position: relative; flex-shrink: 0; transition: 0.25s; border: 1px solid rgba(255,255,255,0.1); }
+        .switch-track.active { background: var(--pause-color); border-color: var(--pause-color); }
+        .switch-thumb { width: 21px; height: 21px; background: #fff; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: 0.25s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .switch-track.active .switch-thumb { right: 25px; }
+        .eval-circle { width: 130px; height: 130px; border-radius: 50%; border: 6px solid var(--deep-gold); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; background: rgba(0,0,0,0.5); color: var(--light-gold); box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: 0.3s; }
+        .eval-stats { margin: 15px 0; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.05); }
+        .eval-stats div { display: flex; justify-content: space-between; margin: 8px 0; color: #ccc; }
+        .eval-stats strong { color: #fff; }
+
+        .top1 { background: linear-gradient(90deg, rgba(255,215,0,0.2), transparent); border: 1px solid var(--gold); color: var(--gold); transform: scale(1.05); box-shadow: 0 4px 15px rgba(255,215,0,0.1); }
+        .top2 { background: linear-gradient(90deg, rgba(192,192,192,0.15), transparent); border: 1px solid var(--silver); color: var(--silver); }
+        .top3 { background: linear-gradient(90deg, rgba(205,127,50,0.15), transparent); border: 1px solid var(--bronze); color: var(--bronze); }
+        .my-rank-out { margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px; color: #aaa; font-style: italic; font-size: 0.85rem; }
+        .user-highlight { border: 1px solid var(--deep-gold) !important; background: rgba(197, 160, 89, 0.1) !important; }
+
+        .goal-selector-container { margin-bottom: 20px; text-align: center; }
+        .goal-label { font-size: 0.8rem; color: #888; margin-bottom: 8px; display: block; }
+        .custom-select { background: #000; border: 1px solid var(--deep-gold); color: var(--light-gold); padding: 10px 15px; border-radius: 12px; font-family: 'Tajawal'; font-weight: bold; outline: none; cursor: pointer; width: 100%; max-width: 160px; appearance: none; text-align: center; }
+
+        .header-title { font-size: clamp(1.5rem, 8vw, 2.2rem); font-weight: 900; background: linear-gradient(to bottom, #fff, var(--deep-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; z-index: 1; }
+
+        .timer-container { background: var(--card-bg); border: 1px solid var(--border-color); padding: 30px 20px; border-radius: 35px; width: 100%; max-width: 400px; text-align: center; backdrop-filter: blur(20px); z-index: 1; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+
+        .mode-buttons { display: flex; gap: 8px; margin-bottom: 25px; }
+        .mode-btn { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #777; padding: 12px 2px; border-radius: 12px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.3s; }
+        .mode-btn.active { border-color: var(--deep-gold); color: var(--light-gold); background: rgba(197, 160, 89, 0.1); }
+
+        .timer-circle-container { position: relative; width: 210px; height: 210px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; }
+        .progress-ring { transform: rotate(-90deg); position: absolute; }
+        .progress-ring__circle { transition: stroke-dashoffset 0.1s linear, stroke 0.3s; stroke: var(--deep-gold); stroke-linecap: round; }
+
+        #timer { font-size: 4rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+        #status { color: var(--deep-gold); font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
+
+        #motivation-box { min-height: 65px; color: var(--light-gold); font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 10px; transition: 0.5s; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+        .controls-container { display: flex; flex-direction: column; gap: 10px; }
+        .action-btn { width: 100%; padding: 18px; border-radius: 18px; font-size: 1rem; font-weight: 900; cursor: pointer; border: none; transition: 0.3s; }
+        .btn-start { background: linear-gradient(45deg, var(--deep-gold), var(--light-gold)); color: #000; box-shadow: 0 5px 15px rgba(197,160,89,0.3); }
+        
+        .secondary-btns { display: none; gap: 10px; width: 100%; }
+        .btn-pause { background: #1a1a1a; color: var(--pause-color); border: 1px solid var(--pause-color); flex: 1; }
+        .btn-surrender { background: #1a1a1a; color: var(--surrender-color); border: 1px solid var(--surrender-color); flex: 1; }
+
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 150; }
+        .total-info { margin-top: 20px; font-size: 0.85rem; color: #666; border-top: 1px solid #222; padding-top: 15px; }
+        #totalStudy { color: var(--deep-gold); font-weight: bold; }
+        #goalStudy { color: #444; }
+        .extra-links { display: flex; gap: 8px; margin-top: 20px; }
+        .extra-btn { flex: 1; text-decoration: none; padding: 12px; border-radius: 15px; font-size: 0.75rem; border: 1px solid rgba(197,160,89,0.3); color: var(--light-gold); text-align: center; transition: 0.3s; }
+        .extra-btn:hover { background: rgba(197,160,89,0.1); }
+        .creator-signature { font-size: 0.85rem; color: rgba(255, 255, 255, 0.5); text-decoration: none; margin-top: 30px; display: block; }
+        .creator-signature:hover { color: var(--light-gold); }
+
+        .auth-tabs { display: flex; gap: 6px; background: rgba(255,255,255,0.04); border-radius: 14px; padding: 5px; margin-bottom: 18px; }
+        .auth-tab { flex: 1; background: transparent; border: none; color: #888; padding: 11px 5px; border-radius: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
+        .auth-tab.active { background: linear-gradient(45deg, var(--deep-gold), var(--light-gold)); color: #000; }
+        .auth-pane { text-align: right; }
+        .password-field { position: relative; }
+        .password-field .modal-input { padding-left: 45px; }
+        .toggle-pass { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.05rem; color: #888; padding: 6px; line-height: 1; }
+        .success-text { color: #2ecc71 !important; }
+        /* إزالة حدود وخلفية الزر الافتراضية */
+.home-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* التحكم بحجم صورة البيت */
+.home-icon {
+  width: 40px;  /* تحكم بالعرض */
+  height: 40px; /* تحكم بالارتفاع */
+  transition: transform 0.2s ease; /* تأثير حركة لطيف */
+}
+
+/* تكبير الصورة قليلاً عند إشارة الماوس */
+.home-btn:hover .home-icon {
+  transform: scale(1.1);
+}
+/* في الـ CSS */
+.home-btn {
+  background-color: #c5a059;
+  border: none;
+  color: rgb(0, 0, 0);
+  padding: 12px 16px;
+  font-size: 15px; /* يتحكم بحجم أيقونة البيت */
+  border-radius: 30%; /* يجعله زر دائري */
+  cursor: pointer;
+   position: fixed;      /* يجعله ثابتاً في الشاشة */
+    top:20px;            /* المسافة من الأفق/الأعلى */
+    left: 20px;       
+    
+    
+}
+    position: fixed;      /* يجعله ثابتاً في الشاشة */
+    top: 20px;            /* المسافة من الأفق/الأعلى */
+    right: 20px;          /* المسافة من اليمين */
+    
+    /* بقية التنسيقات كما هي */
+    background-color: #007bff;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    text-decoration: none;
+    z-index: 1000;
+
+    </style>
+</head>
+<body>
+<!-- في الـ HTML -->
+<a href="https://tlv-12.vercel.app/">
+  <button class="home-btn">
+    <i class="fas fa-home"></i>
+  </button>
+</a>
+    <canvas id="snowCanvas"></canvas>
+    <div id="overlay" onclick="closeAllModals()"></div>
+    
+    <div class="top-nav">
+        <button class="nav-btn" onclick="initLeaderboard()" title="المتصدرون" aria-label="فتح لوحة المتصدرين">🏆</button>
+        <button class="nav-btn" onclick="toggleSidebar()" title="سجل الإنجاز" aria-label="فتح سجل الإنجاز">📊</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span>سجل الإنجاز 🏆</span>
+            <span class="close-sidebar" onclick="toggleSidebar()" role="button" tabindex="0" aria-label="إغلاق السجل">×</span>
+        </div>
+        <ul class="history-list" id="historyList"></ul>
+        <button class="reset-btn" onclick="resetToday()">🔄 تصفير إنجاز اليوم</button>
+    </div>
+
+    <div id="customTimerModal" class="custom-modal">
+        <h3 class="modal-title" style="color: var(--light-gold);">إعداد عداد مخصص ⚙️</h3>
+
+        <div class="time-picker-block">
+            <div class="time-picker-label">⏱️ وقت التركيز</div>
+            <div class="stepper-row">
+                <button type="button" class="stepper-btn" onclick="adjustCustomTime('work', -5)" aria-label="تقليل وقت التركيز">−</button>
+                <div class="stepper-value"><span id="customWorkDisplay">60</span><small>دقيقة</small></div>
+                <button type="button" class="stepper-btn" onclick="adjustCustomTime('work', 5)" aria-label="زيادة وقت التركيز">+</button>
+            </div>
+            <div class="preset-chips" id="workPresetsRow"></div>
+        </div>
+
+        <div class="shutdown-toggle-row" onclick="toggleShutdownMode()" role="button" tabindex="0">
+            <div>
+                <div class="shutdown-title">🔥 وضع الشد (Shutdown)</div>
+                <div class="shutdown-sub">جلسة تركيز واحدة متواصلة، تخلص تلقائياً بدون استراحات</div>
+            </div>
+            <div class="switch-track" id="shutdownSwitch"><div class="switch-thumb"></div></div>
+        </div>
+
+        <div class="time-picker-block" id="breakPickerBlock">
+            <div class="time-picker-label">☕ وقت الاستراحة</div>
+            <div class="stepper-row">
+                <button type="button" class="stepper-btn" onclick="adjustCustomTime('break', -5)" aria-label="تقليل وقت الاستراحة">−</button>
+                <div class="stepper-value"><span id="customBreakDisplay">10</span><small>دقيقة</small></div>
+                <button type="button" class="stepper-btn" onclick="adjustCustomTime('break', 5)" aria-label="زيادة وقت الاستراحة">+</button>
+            </div>
+            <div class="preset-chips" id="breakPresetsRow"></div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="action-btn btn-start" onclick="applyCustomTimer()">تطبيق</button>
+            <button class="action-btn ghost-btn" onclick="closeCustomTimerModal()">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="leaderboardModal" class="custom-modal">
+        <h3 class="modal-title" style="color: var(--light-gold);">أبطال الأسبوع 🔥</h3>
+        <div class="online-badge" id="onlineCounter">🟢 يدرسون الآن: 0</div>
+        <div class="leaderboard-meta" id="leaderboardMeta">جاري تحميل ملخص الأسبوع...</div>
+        <div class="rank-list" id="ranksCont">جاري التحميل...</div>
+        <div id="myStatusCont"></div>
+        <button class="reset-btn" style="width:100%; margin-top: 10px; background: rgba(197,160,89,0.08); color: var(--light-gold); border-color: rgba(197,160,89,0.3);" onclick="openAuthModal('login', true)">تبديل الحساب</button>
+        <button class="reset-btn" style="width:100%; margin-top: 10px; background: rgba(52,152,219,0.08); color: var(--break-blue); border-color: rgba(52,152,219,0.3);" onclick="openChangePassModal()">تغيير كلمة المرور 🔑</button>
+        <button class="reset-btn" style="width:100%; color:#fff; background: rgba(255,255,255,0.1); border: 1px solid #444;" onclick="closeLeaderboard()">إغلاق</button>
+    </div>
+
+    <div id="authModal" class="custom-modal">
+        <div class="auth-tabs">
+            <button type="button" class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+            <button type="button" class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">حساب جديد</button>
+        </div>
+
+        <div id="loginPane" class="auth-pane">
+            <p class="helper-text">سجّل دخولك لحسابك الموجود لحفظ تقدمك وترتيبك.</p>
+            <input id="loginNameInput" class="modal-input" type="text" maxlength="18" placeholder="اسمك">
+            <div class="password-field">
+                <input id="loginPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور">
+                <button type="button" class="toggle-pass" onclick="togglePassVisibility('loginPassInput', this)">👁️</button>
+            </div>
+            <div class="helper-text" id="loginError" style="min-height: 18px; color: #e74c3c;"></div>
+            <div class="modal-actions">
+                <button class="action-btn btn-start" id="loginBtn" onclick="loginUser()">دخول</button>
+                <button class="action-btn ghost-btn" onclick="closeAuthModal()">إلغاء</button>
+            </div>
+        </div>
+
+        <div id="signupPane" class="auth-pane" style="display:none;">
+            <p class="helper-text">اختر اسماً ورمزاً سرياً خاصاً بك حتى محد يأخذ نقاطك.</p>
+            <input id="signupNameInput" class="modal-input" type="text" maxlength="18" placeholder="اسمك (3 أحرف فأكثر)">
+            <div class="password-field">
+                <input id="signupPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة مرور (4 رموز فأكثر)">
+                <button type="button" class="toggle-pass" onclick="togglePassVisibility('signupPassInput', this)">👁️</button>
+            </div>
+            <div class="password-field">
+                <input id="signupConfirmInput" class="modal-input" type="password" maxlength="20" placeholder="تأكيد كلمة المرور">
+                <button type="button" class="toggle-pass" onclick="togglePassVisibility('signupConfirmInput', this)">👁️</button>
+            </div>
+            <div class="helper-text" id="signupError" style="min-height: 18px; color: #e74c3c;"></div>
+            <div class="modal-actions">
+                <button class="action-btn btn-start" id="signupBtn" onclick="signupUser()">إنشاء الحساب</button>
+                <button class="action-btn ghost-btn" onclick="closeAuthModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="changePassModal" class="custom-modal">
+        <h3 class="modal-title" style="color: var(--light-gold);">تغيير كلمة المرور 🔑</h3>
+        <p class="helper-text">أدخل كلمة مرورك الحالية، ثم كلمة المرور الجديدة.</p>
+        <div class="password-field">
+            <input id="currentPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور الحالية">
+            <button type="button" class="toggle-pass" onclick="togglePassVisibility('currentPassInput', this)">👁️</button>
+        </div>
+        <div class="password-field">
+            <input id="newPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور الجديدة (4 رموز فأكثر)">
+            <button type="button" class="toggle-pass" onclick="togglePassVisibility('newPassInput', this)">👁️</button>
+        </div>
+        <div class="password-field">
+            <input id="newPassConfirmInput" class="modal-input" type="password" maxlength="20" placeholder="تأكيد كلمة المرور الجديدة">
+            <button type="button" class="toggle-pass" onclick="togglePassVisibility('newPassConfirmInput', this)">👁️</button>
+        </div>
+        <div class="helper-text" id="changePassError" style="min-height: 18px; color: #e74c3c;"></div>
+        <div class="modal-actions">
+            <button class="action-btn btn-start" id="changePassBtn" onclick="submitChangePassword()">حفظ كلمة المرور</button>
+            <button class="action-btn ghost-btn" onclick="closeChangePassModal()">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="surrenderConfirmModal" class="custom-modal">
+        <h3 class="modal-title danger-text">تأكيد الاستسلام ⚠️</h3>
+        <p style="color: #ccc; margin-bottom: 10px; font-size: 0.95rem;">هل أنت متأكد أنك تريد إنهاء جلسة الدراسة الآن والحصول على تقييمك؟</p>
+        <div class="modal-actions">
+            <button class="action-btn" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3);" onclick="processSurrender()">نعم، أنهِ الجلسة</button>
+            <button class="action-btn btn-start" onclick="closeSurrenderConfirm()">تراجع واكمل</button>
+        </div>
+    </div>
+
+    <div id="evaluationModal" class="custom-modal">
+        <h3 class="modal-title" style="color: var(--light-gold);">حصيلة اليوم 📊</h3>
+        <div class="eval-circle" id="evalPercent">0%</div>
+        <p id="evalMessage" style="font-weight: 900; font-size: 1.1rem; margin-bottom: 10px;"></p>
+        <div class="eval-stats">
+            <div><span>الهدف اليومي المخطط:</span> <strong id="evalGoalVal">0 س</strong></div>
+            <div><span>ما تم إنجازه فعلياً:</span> <strong id="evalStudiedVal">0 س</strong></div>
+        </div>
+        <button class="action-btn btn-start" style="width: 100%; margin-top: 10px;" onclick="closeEvaluation()">حسناً، فهمت</button>
+    </div>
+
+    <div class="header-title">POMODORO TIMER</div>
+
+    <div class="timer-container">
+        <div class="goal-selector-container">
+            <span class="goal-label">هدف الدراسة اليومي</span>
+            <select class="custom-select" id="dailyGoalSelect" onchange="updateGoal()">
+                <option value="4">4 ساعات</option>
+                <option value="6">6 ساعات</option>
+                <option value="9" selected>9 ساعات</option>
+                <option value="12">12 ساعة</option>
+            </select>
+        </div>
+
+        <div class="mode-buttons">
+            <button class="mode-btn active" id="m25" onclick="setMode(25, 5, 'm25')">25 / 5 د</button>
+            <button class="mode-btn" id="m45" onclick="setMode(45, 10, 'm45')">45 / 10 د</button>
+            <button class="mode-btn" id="mCustom" onclick="openCustomTimerModal()">تخصيص ⚙️</button>
+        </div>
+
+        <div id="status">Study with خلاصة</div>
+
+        <div class="timer-circle-container">
+            <svg class="progress-ring" width="210" height="210">
+                <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="95" cx="105" cy="105"/>
+            </svg>
+            <div id="timer">25:00</div>
+        </div>
+
+        <div id="motivation-box"></div>
+
+        <div class="controls-container">
+            <button class="action-btn btn-start" id="mainBtn" onclick="startTimer()">يلا ابدي</button>
+            <div class="secondary-btns" id="secControls">
+                <button class="action-btn btn-pause" id="pauseBtn" onclick="togglePause()">إيقاف مؤقت</button>
+                <button class="action-btn btn-surrender" id="surrenderBtn" onclick="surrender()">الاستسلام 🛑</button>
+            </div>
+        </div>
+
+        <div class="total-info">إجمالي دراسة اليوم: <span id="totalStudy">00:00:00</span> من <span id="goalStudy">09:00:00</span></div>
+        
+
+        <div class="extra-links">
+            <a href="https://t.me/tlv_12" target="_blank" class="extra-btn">خلاصة السادس</a>
+            
+        </div>
+    </div>
+
+    <a href="https://t.me/Not_Wdh" target="_blank" class="creator-signature">Created By: @Not_Wdh</a>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq, duration, type = 'sine') {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playPhoneAlarm() {
+            const startAt = audioCtx.currentTime;
+            const notes = [
+                { time: 0.00, freq: 880, duration: 0.16, type: 'triangle' }, { time: 0.18, freq: 1174, duration: 0.16, type: 'triangle' },
+                { time: 0.36, freq: 1568, duration: 0.22, type: 'triangle' }, { time: 0.72, freq: 880, duration: 0.16, type: 'triangle' },
+                { time: 0.90, freq: 1174, duration: 0.16, type: 'triangle' }, { time: 1.08, freq: 1760, duration: 0.28, type: 'triangle' }
+            ];
+            notes.forEach(note => {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = note.type; osc.frequency.setValueAtTime(note.freq, startAt + note.time);
+                gain.gain.setValueAtTime(0.0001, startAt + note.time); gain.gain.exponentialRampToValueAtTime(0.14, startAt + note.time + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startAt + note.time + note.duration);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startAt + note.time); osc.stop(startAt + note.time + note.duration);
+            });
+        }
+
+        // إشعارات النظام: دعم احتياطي لتنبيه انتهاء الجلسة حتى لو كان المتصفح بالخلفية لفترة قصيرة.
+        // ملاحظة مهمة: نظام iOS يوقف تشغيل الجافاسكربت تماماً عند قفل الشاشة أو تبديل التطبيق لفترة طويلة،
+        // وهذا قيد من Apple على كل المواقع بدون استثناء (حتى تطبيقات الويب المثبتة). لا توجد طريقة على الويب
+        // لتجاوز هذا القيد إلا ببرنامج فعلي من الـ App Store. ما نقدر نضمنه هو: دقّة حساب وقت الدراسة المنقضي
+        // (يعتمد على الوقت الفعلي وقت العودة للتطبيق، لا على عدّ الثواني)، وتنبيه فوري بمجرد ما ترجع للصفحة.
+        function requestNotifyPermission() {
+            try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {}); } catch (e) {}
+        }
+        function notifySessionEnd(wasBreak) {
+            try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(wasBreak ? 'خلصت الاستراحة ☕' : 'خلصت جلسة التركيز! 🎉', {
+                        body: wasBreak ? 'رجعتلك حماسك؟ يلا للتركيز 💪' : 'وقت الاستراحة الحين، خذ نفسك',
+                        tag: 'kh-timer', silent: false
+                    });
+                }
+            } catch (e) {}
+        }
+
+        // نظام الكلمات التحفيزية:
+        // مكتبة محلية محترمة بالعربي والإنجليزي مرتبطة بكل مرحلة من الجلسة (25% / 50% / 75%)
+        // + اقتباسات إنجليزية حقيقية تُجلب من خدمة مجانية على الإنترنت لمزيد من التنوع.
+        // إذا تعذر الاتصال بالإنترنت، يستمر النظام بالاعتماد على المكتبة المحلية فقط (يعمل دائماً بدون تعطل).
+        const localMotivationPool = {
+            25: [
+                { lang: 'ar', text: 'البداية الصعبة جزء من الطريق، كمّل وما عليك' },
+                { lang: 'ar', text: 'كل دقيقة تركيز الحين توفرلك وقت أكثر بعدين' },
+                { lang: 'ar', text: 'صبرك اليوم أساس راحتك بكرة' },
+                { lang: 'ar', text: 'بدأت، وهذا أهم خطوة' },
+                { lang: 'ar', text: 'ركّز شوي، الباقي يجي تلقائي' },
+                { lang: 'ar', text: 'خطوة بخطوة، وما حد وصل القمة بقفزة وحدة' },
+                { lang: 'en', text: 'The first step is always the hardest, keep going' },
+                { lang: 'en', text: 'Small steps every day lead to big results' },
+                { lang: 'en', text: 'Discipline today, freedom tomorrow' },
+                { lang: 'en', text: 'You showed up, that already counts' },
+                { lang: 'en', text: 'Stay patient, the results will follow' },
+                { lang: 'en', text: 'Progress starts the moment you begin' }
+            ],
+            50: [
+                { lang: 'ar', text: 'نص الطريق ورا ظهرك، لا توقف الحين' },
+                { lang: 'ar', text: 'أنت أقوى من أي كسل يحاول يوقفك' },
+                { lang: 'ar', text: 'التعب مؤقت، والنتيجة تبقى' },
+                { lang: 'ar', text: 'نصف الجهد ضاع لو توقفت الحين، كمّل' },
+                { lang: 'ar', text: 'أنت أقرب من اللي تتوقع، شد حيلك' },
+                { lang: 'ar', text: 'استمر، نصك الثاني يبني على هذا النصف' },
+                { lang: 'en', text: 'Halfway there, do not stop now' },
+                { lang: 'en', text: 'Your focus right now is shaping your future' },
+                { lang: 'en', text: 'Progress is still progress, no matter how slow' },
+                { lang: 'en', text: 'You are closer than you think, keep pushing' },
+                { lang: 'en', text: 'Stay consistent, results are catching up' },
+                { lang: 'en', text: 'Keep the momentum, you have earned it' }
+            ],
+            75: [
+                { lang: 'ar', text: 'باقي شوي وتخلص، لا تستسلم وأنت قريب' },
+                { lang: 'ar', text: 'كل اللي تعبته اليوم رايح يفرق فعلاً' },
+                { lang: 'ar', text: 'هذا آخر مجهود، وبعده راحة حقيقية' },
+                { lang: 'ar', text: 'فخور بصبرك، خلص بقوة' },
+                { lang: 'ar', text: 'النهاية قريبة، خلها نهاية تستحق التعب' },
+                { lang: 'ar', text: 'شد عصبك شوي وخلص، أنت قدها' },
+                { lang: 'en', text: 'The finish line is in sight, finish strong' },
+                { lang: 'en', text: 'You are almost there, do not slow down now' },
+                { lang: 'en', text: 'One last push and you are done for today' },
+                { lang: 'en', text: 'Strong finish, that is what champions do' },
+                { lang: 'en', text: 'Make this last stretch count' },
+                { lang: 'en', text: 'End today on your best effort' }
+            ]
+        };
+
+        // كلمات نتجنبها كفلتر أمان إضافي على الاقتباسات القادمة من الإنترنت، حتى تبقى محترمة دائماً
+        const motivationBlocklist = ['hate', 'kill', 'damn', 'stupid', 'idiot', 'hell', 'sex', 'curse'];
+        let liveQuotesPool = [];
+        let liveQuotesFetched = false;
+
+        // جلب اقتباسات إنجليزية حقيقية من خدمة مجانية على الإنترنت (لا تحتاج مفتاح API)
+        // تعمل مرة واحدة لكل جلسة تصفح فقط، وإذا تعذر الاتصال يبقى التطبيق يعمل بالمكتبة المحلية بدون أي تعطل
+        async function fetchLiveQuotes() {
+            if (liveQuotesFetched) return;
+            liveQuotesFetched = true;
+            try {
+                const res = await fetch('https://dummyjson.com/quotes?limit=100');
+                if (!res.ok) throw new Error('bad response');
+                const data = await res.json();
+                liveQuotesPool = (data.quotes || [])
+                    .map(q => (q.quote || '').trim())
+                    .filter(q => q.length > 0 && q.length <= 110)
+                    .filter(q => !motivationBlocklist.some(bad => q.toLowerCase().includes(bad)));
+            } catch (err) {
+                liveQuotesPool = [];
+                console.warn('تعذر جلب اقتباسات من الإنترنت، سيتم الاعتماد على المكتبة المحلية فقط:', err);
+            }
+        }
+
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        // يبني مجموعة الجلسة لمرحلة معينة: نصف عربي محلي + نصف إنجليزي (محلي + من الإنترنت)
+        // بهذا الشكل تطلع الجمل عشوائياً مرة بالعربي ومرة بالإنجليزي، وتتغير مع كل جلسة جديدة
+        function buildTierPool(mark) {
+            const tier = localMotivationPool[mark] || [];
+            const localAr = tier.filter(q => q.lang === 'ar');
+            const localEn = tier.filter(q => q.lang === 'en');
+            let enCandidates = [...localEn];
+            if (liveQuotesPool.length) {
+                enCandidates = enCandidates.concat(shuffleArray(liveQuotesPool).slice(0, 8).map(text => ({ lang: 'en', text })));
+            }
+            const balancedEn = shuffleArray(enCandidates).slice(0, Math.max(localAr.length, 4));
+            return shuffleArray([...localAr, ...balancedEn]);
+        }
+
+        let sessionQuotesPools = {};
+        function resetSessionQuotes() { sessionQuotesPools = { 25: buildTierPool(25), 50: buildTierPool(50), 75: buildTierPool(75) }; }
+        function getUniqueSessionQuote(mark) {
+            if (!sessionQuotesPools[mark] || !sessionQuotesPools[mark].length) sessionQuotesPools[mark] = buildTierPool(mark);
+            return sessionQuotesPools[mark].pop() || { lang: 'ar', text: 'استمر يا بطل' };
+        }
+        function showMotivation(mark) {
+            const box = document.getElementById('motivation-box'); box.style.opacity = 0;
+            setTimeout(() => {
+                const quote = getUniqueSessionQuote(mark);
+                box.setAttribute('dir', quote.lang === 'en' ? 'ltr' : 'rtl');
+                box.innerText = quote.text;
+                box.style.opacity = 1;
+            }, 200);
+        }
+        function getCrossedMilestones(previousTime, currentTime, sessionTotal) {
+            const milestones = [25, 50, 75];
+            const previousProgress = ((sessionTotal - previousTime) / sessionTotal) * 100;
+            const currentProgress = ((sessionTotal - currentTime) / sessionTotal) * 100;
+            return milestones.filter(mark => previousProgress < mark && currentProgress >= mark);
+        }
+
+        fetchLiveQuotes();
+
+
+        // ضع بيانات مشروع Firebase الحقيقية الخاصة بك هنا (من إعدادات المشروع في Firebase Console)
+        const firebaseConfig = {
+            apiKey: "AIzaSy...", 
+            databaseURL: "https://w-57b20-default-rtdb.firebaseio.com/",
+            projectId: "w-57b20",
+            appId: "1:..." 
+        };
+
+        // تشغيل آمن: إذا تعذر الاتصال بـ Firebase (مفاتيح غير صحيحة أو لا يوجد إنترنت)
+        // يبقى المؤقت ودراستك المحلية تعملان بشكل طبيعي، وتتعطل فقط ميزات لوحة المتصدرين وتسجيل الدخول.
+        let db = null;
+        let firebaseReady = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            firebaseReady = true;
+        } catch (err) {
+            console.warn('تعذر تهيئة Firebase، التطبيق يعمل الآن بدون ميزات الاتصال:', err);
+            firebaseReady = false;
+        }
+
+        function showOfflineNotice(containerEl) {
+            if (containerEl) containerEl.innerHTML = 'تعذر الاتصال بخدمة لوحة المتصدرين الآن. تأكد من الإنترنت وحاول مرة أخرى — مؤقتك ودراستك المحلية يستمران بشكل طبيعي.';
+        }
+
+        // تجزئة كلمة المرور بـ SHA-256 قبل تخزينها، بدل حفظها كنص واضح
+        async function hashPassword(pw) {
+            const data = new TextEncoder().encode(pw);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // دالة لمنع حقن أكواد HTML/JS لتخريب لوحة المتصدرين
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        let uName = localStorage.getItem('kh_name'); 
+        let uNameKey = localStorage.getItem('kh_name_key'); 
+        let myPresenceRef = null;
+        let unsyncedSeconds = 0; 
+        
+        let wakeLock = null; // للحفاظ على الشاشة تعمل
+
+        // السماح فقط بالحروف العربية، الإنجليزية، الأرقام والمسافات
+        function normalizeUserName(name) { 
+            return (name || '')
+                .replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '') // إزالة أي رموز غريبة أو إيموجي
+                .replace(/\s+/g, ' ') 
+                .trim()
+                .substring(0, 18); 
+        }
+
+        function getUserKey(name) { return normalizeUserName(name).toLowerCase().replace(/\s+/g, '_'); }
+
+        // === فلتر الكلمات المسيئة لمنع استخدامها كاسم حساب ===
+        // قائمة أساسية تغطي أكثر الكلمات الشائعة (عربي + إنجليزي). تقدر تضيف أي كلمة جديدة بسهولة بسطر واحد بالمصفوفة.
+        const BANNED_NAME_FRAGMENTS = [
+            'كس', 'نيك', 'نياك', 'متناك', 'منيوك', 'زبي', 'شرموط', 'شرمط', 'عرص', 'خول', 'قحبه', 'قحبة', 'لوطي', 'كسمك', 'طيز',
+            'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'cunt', 'whore', 'slut', 'nigger', 'nigga', 'faggot', 'retard', 'rape', 'porn', 'pussy', 'dick', 'cock'
+        ];
+        // تطبيع النص للمقارنة فقط: يوحّد حروف عربية متشابهة، يحوّل أرقام الـ"ليتسبيك" الشائعة لحروفها،
+        // يشيل المسافات والرموز، ويقلّل تكرار الحرف (مثل "فــــــك" أو "fuuuuck") لمنع الالتفاف على الفلتر.
+        function normalizeForBadWordCheck(str) {
+            return (str || '')
+                .toLowerCase()
+                .replace(/[\u064B-\u065F\u0670]/g, '')
+                .replace(/[إأآا]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+                .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't').replace(/\$/g, 's').replace(/@/g, 'a')
+                .replace(/[^a-z\u0600-\u06FF]/g, '')
+                .replace(/(.)\1+/g, '$1');
+        }
+        function containsBannedWord(name) {
+            const normalized = normalizeForBadWordCheck(name);
+            return BANNED_NAME_FRAGMENTS.some(w => normalized.includes(normalizeForBadWordCheck(w)));
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+
+        // === منطق واجهة تخصيص الوقت الحديثة (ستيبر + شرائح اختيار سريع + مفتاح وضع الشد) ===
+        const WORK_PRESETS = [25, 45, 60, 90, 120];
+        const BREAK_PRESETS = [5, 10, 15, 20];
+        let customWorkMinutes = 60, customBreakMinutes = 10, breakBeforeShutdown = 10, isShutdownModeActive = false;
+
+        function renderPresetChips(rowId, presets, type) {
+            const row = document.getElementById(rowId);
+            row.innerHTML = presets.map(v => `<button type="button" class="chip-btn" data-val="${v}" onclick="setCustomTime('${type}', ${v})">${v}</button>`).join('');
+        }
+
+        function updateCustomTimeDisplays() {
+            document.getElementById('customWorkDisplay').innerText = customWorkMinutes;
+            document.getElementById('customBreakDisplay').innerText = customBreakMinutes;
+            document.querySelectorAll('#workPresetsRow .chip-btn').forEach(c => c.classList.toggle('active', Number(c.dataset.val) === customWorkMinutes));
+            document.querySelectorAll('#breakPresetsRow .chip-btn').forEach(c => c.classList.toggle('active', Number(c.dataset.val) === customBreakMinutes));
+        }
+
+        function adjustCustomTime(type, delta) {
+            if (type === 'work') { customWorkMinutes = Math.min(300, Math.max(5, customWorkMinutes + delta)); }
+            else { if (isShutdownModeActive) return; customBreakMinutes = Math.min(60, Math.max(0, customBreakMinutes + delta)); }
+            updateCustomTimeDisplays();
+        }
+
+        function setCustomTime(type, val) {
+            if (type === 'work') { customWorkMinutes = val; }
+            else { if (isShutdownModeActive) return; customBreakMinutes = val; }
+            updateCustomTimeDisplays();
+        }
+
+        function toggleShutdownMode() {
+            isShutdownModeActive = !isShutdownModeActive;
+            document.getElementById('shutdownSwitch').classList.toggle('active', isShutdownModeActive);
+            document.getElementById('breakPickerBlock').classList.toggle('disabled-block', isShutdownModeActive);
+            if (isShutdownModeActive) {
+                breakBeforeShutdown = customBreakMinutes > 0 ? customBreakMinutes : breakBeforeShutdown;
+                customBreakMinutes = 0;
+            } else {
+                customBreakMinutes = breakBeforeShutdown || 10;
+            }
+            updateCustomTimeDisplays();
+        }
+
+        // فتح وإغلاق قائمة الوقت المخصص
+        function openCustomTimerModal() {
+            document.getElementById('customTimerModal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+            if (!document.getElementById('workPresetsRow').children.length) { renderPresetChips('workPresetsRow', WORK_PRESETS, 'work'); renderPresetChips('breakPresetsRow', BREAK_PRESETS, 'break'); }
+
+            customWorkMinutes = Math.min(300, Math.max(5, parseInt(localStorage.getItem('kh_cust_w')) || 60));
+            const savedBreak = parseInt(localStorage.getItem('kh_cust_b'));
+            isShutdownModeActive = savedBreak === 0;
+            customBreakMinutes = isShutdownModeActive ? 0 : (isNaN(savedBreak) ? 10 : Math.min(60, Math.max(0, savedBreak)));
+            breakBeforeShutdown = isShutdownModeActive ? 10 : customBreakMinutes;
+
+            document.getElementById('shutdownSwitch').classList.toggle('active', isShutdownModeActive);
+            document.getElementById('breakPickerBlock').classList.toggle('disabled-block', isShutdownModeActive);
+            updateCustomTimeDisplays();
+        }
+        
+        function closeCustomTimerModal() {
+            document.getElementById('customTimerModal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function applyCustomTimer() {
+            let cw = Math.min(300, Math.max(5, customWorkMinutes));
+            let cb = isShutdownModeActive ? 0 : Math.min(60, Math.max(0, customBreakMinutes));
+
+            localStorage.setItem('kh_cust_w', cw);
+            localStorage.setItem('kh_cust_b', cb);
+            closeCustomTimerModal();
+            setMode(cw, cb, 'mCustom');
+        }
+
+        function openAuthModal(tab = 'login', fromLeaderboard = false) {
+            if (!fromLeaderboard) closeLeaderboard();
+            document.getElementById('authModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
+            switchAuthTab(tab);
+            document.getElementById('loginNameInput').value = uName || ''; document.getElementById('loginPassInput').value = '';
+            document.getElementById('signupNameInput').value = ''; document.getElementById('signupPassInput').value = ''; document.getElementById('signupConfirmInput').value = '';
+            document.getElementById('loginError').innerText = ''; document.getElementById('signupError').innerText = '';
+        }
+
+        function switchAuthTab(tab) {
+            const isLogin = tab === 'login';
+            document.getElementById('tabLogin').classList.toggle('active', isLogin);
+            document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+            document.getElementById('loginPane').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('signupPane').style.display = isLogin ? 'none' : 'block';
+            setTimeout(() => document.getElementById(isLogin ? 'loginNameInput' : 'signupNameInput').focus(), 50);
+        }
+
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; if (document.getElementById('leaderboardModal').style.display !== 'block') document.getElementById('overlay').style.display = 'none'; }
+
+        function togglePassVisibility(inputId, btn) {
+            const input = document.getElementById(inputId); const showingText = input.type === 'password';
+            input.type = showingText ? 'text' : 'password'; btn.innerText = showingText ? '🙈' : '👁️';
+        }
+
+        function openChangePassModal() {
+            if (!uNameKey) { alert('سجّل الدخول أولاً حتى تقدر تغيّر كلمة المرور.'); return; }
+            document.getElementById('changePassModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
+            ['currentPassInput', 'newPassInput', 'newPassConfirmInput'].forEach(id => document.getElementById(id).value = '');
+            const errEl = document.getElementById('changePassError'); errEl.classList.remove('success-text'); errEl.innerText = '';
+            setTimeout(() => document.getElementById('currentPassInput').focus(), 50);
+        }
+
+        function closeChangePassModal() { document.getElementById('changePassModal').style.display = 'none'; if (document.getElementById('leaderboardModal').style.display !== 'block') document.getElementById('overlay').style.display = 'none'; }
+
+        function closeAllModals() {
+            ['authModal', 'changePassModal', 'leaderboardModal', 'surrenderConfirmModal', 'evaluationModal', 'customTimerModal'].forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById('overlay').style.display = 'none';
+            if (firebaseReady && leaderboardListener) db.ref(`leaderboard_weeks/${getWeekKey()}`).off('value', leaderboardListener);
+            document.getElementById('sidebar').classList.remove('active');
+        }
+
+        // تسجيل الدخول: لحساب موجود فقط، منفصل تماماً عن إنشاء حساب وعن تغيير كلمة المرور
+        async function loginUser() {
+            const rawName = document.getElementById('loginNameInput').value; const password = document.getElementById('loginPassInput').value;
+            const cleanedName = normalizeUserName(rawName); const errorEl = document.getElementById('loginError'); const btn = document.getElementById('loginBtn');
+            errorEl.innerText = '';
+            if (cleanedName.length < 3) return errorEl.innerText = 'الاسم لازم يكون 3 أحرف أو أكثر.';
+            if (!password) return errorEl.innerText = 'اكتب كلمة المرور.';
+            if (!firebaseReady) return errorEl.innerText = 'تعذر الاتصال بالخادم الآن، تأكد من الإنترنت وحاول مرة أخرى.';
+            const key = getUserKey(cleanedName); btn.innerText = "جاري التحقق..."; btn.disabled = true;
+            try {
+                const passwordHash = await hashPassword(password);
+                const snap = await db.ref('users_auth/' + key).once('value');
+                btn.innerText = "دخول"; btn.disabled = false;
+                if (!snap.exists()) { errorEl.innerText = 'هذا الحساب غير موجود، جرّب تبويب "حساب جديد".'; return; }
+                const stored = snap.val();
+                const matchesHash = stored.passwordHash === passwordHash;
+                const matchesLegacy = !stored.passwordHash && stored.password === password; // حسابات قديمة كانت مخزّنة كنص واضح
+                if (!matchesHash && !matchesLegacy) { errorEl.innerText = "كلمة المرور غلط، حاول مرة ثانية."; return; }
+                if (matchesLegacy) db.ref('users_auth/' + key).set({ passwordHash }).catch(() => {});
+                finalizeLogin(cleanedName, key);
+            } catch (err) {
+                btn.innerText = "دخول"; btn.disabled = false; errorEl.innerText = "خطأ بالاتصال، تأكد من الإنترنت.";
+            }
+        }
+
+        // إنشاء حساب جديد فقط، يفشل برسالة واضحة لو الاسم محجوز (بدون اللجوء التلقائي لتسجيل الدخول)
+        async function signupUser() {
+            const rawName = document.getElementById('signupNameInput').value;
+            const password = document.getElementById('signupPassInput').value;
+            const confirmPw = document.getElementById('signupConfirmInput').value;
+            const cleanedName = normalizeUserName(rawName); const errorEl = document.getElementById('signupError'); const btn = document.getElementById('signupBtn');
+            errorEl.innerText = '';
+            if (cleanedName.length < 3) return errorEl.innerText = 'الاسم لازم يكون 3 أحرف أو أكثر.';
+            if (containsBannedWord(cleanedName)) return errorEl.innerText = 'هذا الاسم غير مسموح، اختر اسم محترم 🙏';
+            if (password.length < 4) return errorEl.innerText = 'كلمة المرور لازم تكون 4 رموز على الأقل.';
+            if (password !== confirmPw) return errorEl.innerText = 'كلمتا المرور غير متطابقتين.';
+            if (!firebaseReady) return errorEl.innerText = 'تعذر الاتصال بالخادم الآن، تأكد من الإنترنت وحاول مرة أخرى.';
+            const key = getUserKey(cleanedName); btn.innerText = "جاري الإنشاء..."; btn.disabled = true;
+            try {
+                const snap = await db.ref('users_auth/' + key).once('value');
+                btn.innerText = "إنشاء الحساب"; btn.disabled = false;
+                if (snap.exists()) { errorEl.innerText = 'هذا الاسم محجوز، جرّب اسم آخر أو سجّل الدخول.'; return; }
+                const passwordHash = await hashPassword(password);
+                await db.ref('users_auth/' + key).set({ passwordHash });
+                finalizeLogin(cleanedName, key);
+            } catch (err) {
+                btn.innerText = "إنشاء الحساب"; btn.disabled = false; errorEl.innerText = "خطأ بالاتصال، تأكد من الإنترنت.";
+            }
+        }
+
+        // تغيير كلمة المرور لحساب مسجَّل دخوله حالياً، منفصل بالكامل عن تسجيل الدخول وإنشاء الحساب
+        async function submitChangePassword() {
+            const currentPw = document.getElementById('currentPassInput').value;
+            const newPw = document.getElementById('newPassInput').value;
+            const confirmPw = document.getElementById('newPassConfirmInput').value;
+            const errorEl = document.getElementById('changePassError'); const btn = document.getElementById('changePassBtn');
+            errorEl.classList.remove('success-text'); errorEl.innerText = '';
+
+            if (!uNameKey) return errorEl.innerText = 'سجّل الدخول أولاً.';
+            if (!currentPw) return errorEl.innerText = 'اكتب كلمة المرور الحالية.';
+            if (newPw.length < 4) return errorEl.innerText = 'كلمة المرور الجديدة لازم تكون 4 رموز على الأقل.';
+            if (newPw !== confirmPw) return errorEl.innerText = 'كلمتا المرور الجديدتان غير متطابقتين.';
+            if (newPw === currentPw) return errorEl.innerText = 'كلمة المرور الجديدة لازم تختلف عن الحالية.';
+            if (!firebaseReady) return errorEl.innerText = 'تعذر الاتصال بالخادم الآن، تأكد من الإنترنت وحاول مرة أخرى.';
+
+            btn.innerText = "جاري الحفظ..."; btn.disabled = true;
+            try {
+                const currentHash = await hashPassword(currentPw);
+                const snap = await db.ref('users_auth/' + uNameKey).once('value');
+                if (!snap.exists()) { btn.innerText = "حفظ كلمة المرور"; btn.disabled = false; errorEl.innerText = 'تعذر العثور على حسابك.'; return; }
+                const stored = snap.val();
+                const matchesHash = stored.passwordHash === currentHash;
+                const matchesLegacy = !stored.passwordHash && stored.password === currentPw;
+                if (!matchesHash && !matchesLegacy) { btn.innerText = "حفظ كلمة المرور"; btn.disabled = false; errorEl.innerText = 'كلمة المرور الحالية غلط.'; return; }
+                const newHash = await hashPassword(newPw);
+                await db.ref('users_auth/' + uNameKey).set({ passwordHash: newHash });
+                btn.innerText = "حفظ كلمة المرور"; btn.disabled = false;
+                errorEl.classList.add('success-text'); errorEl.innerText = 'تم تغيير كلمة المرور بنجاح ✅';
+                setTimeout(() => { closeChangePassModal(); errorEl.classList.remove('success-text'); }, 1300);
+            } catch (err) {
+                btn.innerText = "حفظ كلمة المرور"; btn.disabled = false; errorEl.innerText = "خطأ بالاتصال، تأكد من الإنترنت.";
+            }
+        }
+
+        function finalizeLogin(cleanedName, key) {
+            const oldKey = uNameKey;
+            if (oldKey && oldKey !== key) {
+                db.ref(`leaderboard_weeks/${getWeekKey()}/${oldKey}`).remove().catch(() => {});
+                if (myPresenceRef) myPresenceRef.remove();
+            }
+            uName = cleanedName; uNameKey = key; 
+            localStorage.setItem('kh_name', uName); 
+            localStorage.setItem('kh_name_key', uNameKey);
+            closeAuthModal(); 
+
+            db.ref(`users_data/${key}/studyData`).once('value', snap => {
+                if (snap.exists()) {
+                    let cloudData = snap.val();
+                    if (cloudData.weekKey === getWeekKey()) {
+                        for (let d in cloudData.days) { studyData.days[d] = Math.max(studyData.days[d] || 0, cloudData.days[d]); }
+                    }
+                }
+                saveDataLocal(); syncToFirebase(); setupPresence(); openLeaderboard();
+            }).catch(() => { saveDataLocal(); syncToFirebase(); setupPresence(); openLeaderboard(); });
+        }
+
+        function setupPresence() {
+            if (!firebaseReady || !uNameKey) return;
+            const connectedRef = db.ref('.info/connected');
+            if (myPresenceRef) myPresenceRef.off();
+            myPresenceRef = db.ref(`online_users/${uNameKey}`);
+            connectedRef.on('value', (snap) => { if (snap.val() === true) { myPresenceRef.set(true); myPresenceRef.onDisconnect().remove(); } }, () => {});
+        }
+
+        if (firebaseReady) {
+            db.ref('online_users').on('value', snap => {
+                const el = document.getElementById('onlineCounter'); if (el) el.innerText = `🟢 يدرسون الآن: ${snap.numChildren()}`;
+            }, () => { const el = document.getElementById('onlineCounter'); if (el) el.innerText = '🔴 غير متصل بالخادم'; });
+        }
+
+        function initLeaderboard() {
+            if (!firebaseReady) { alert('تعذر الاتصال بخدمة لوحة المتصدرين الآن. تأكد من الإنترنت وحاول لاحقاً.'); return; }
+            if (!uName) { openAuthModal('login'); return; }
+            openLeaderboard();
+        }
+        
+        function syncToFirebase() {
+            if (!firebaseReady || !uName || !uNameKey) return;
+            ensureWeeklyReset(); const weekKey = getWeekKey();
+            db.ref(`users_data/${uNameKey}/studyData`).set({ weekKey: weekKey, days: studyData.days || {} }).catch(() => {});
+            db.ref(`leaderboard_weeks/${weekKey}/` + uNameKey).set({ name: uName, time: getWeeklyTotalSeconds(), days: getWeeklyStudyDays(), lastSeen: Date.now(), weekKey, key: uNameKey }).catch(() => {});
+        }
+
+        let leaderboardListener = null;
+        function openLeaderboard() {
+            document.getElementById('leaderboardModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
+            if (!firebaseReady) {
+                document.getElementById('leaderboardMeta').innerText = '';
+                showOfflineNotice(document.getElementById('ranksCont'));
+                return;
+            }
+            ensureWeeklyReset();
+            const leaderboardRef = db.ref(`leaderboard_weeks/${getWeekKey()}`);
+            if (leaderboardListener) leaderboardRef.off('value', leaderboardListener);
+            leaderboardListener = leaderboardRef.orderByChild('time').on('value', snapshot => {
+                let players = []; snapshot.forEach(child => { players.push(child.val()); });
+                players = players.filter(p => p && p.name).sort((a, b) => (b.time - a.time) || (a.lastSeen - b.lastSeen));
+                let html = ''; let myRank = -1;
+                document.getElementById('leaderboardMeta').innerHTML = `<strong>اسمك:</strong> ${uName || 'غير محدد'}<br><strong>مجموعك هذا الأسبوع:</strong> ${formatHoursLabel(getWeeklyTotalSeconds())}<br><strong>أيام الدراسة:</strong> ${getWeeklyStudyDays()} يوم`;
+                players.slice(0, 10).forEach((player, index) => {
+                    let rank = index + 1; let isMe = (player.key === uNameKey); if (isMe) myRank = rank;
+                    let rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : ''; if (isMe) rankClass += ' user-highlight';
+                    const badge = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+                    html += `<div class="rank-item ${rankClass}"><span class="rank-name"><span class="rank-badge">${badge}</span><span>${escapeHTML(player.name)} ${isMe ? '(أنت)' : ''}<small class="rank-subtext">${Number(player.days) || 0} يوم دراسة</small></span></span><span class="rank-time">${formatHoursLabel(player.time)}</span></div>`;
+                });
+                document.getElementById('ranksCont').innerHTML = html || "لا يوجد متنافسين حالياً";
+                if (uName) {
+                    myRank = players.findIndex(p => p.key === uNameKey) + 1; let myCont = document.getElementById('myStatusCont');
+                    if (myRank > 10) {
+                        let myData = players[myRank-1];
+                        myCont.innerHTML = `<div class="my-rank-out"><span>ترتيبك الحالي: ${myRank}</span><br><div class="rank-item user-highlight" style="margin-top:5px"><span class="rank-name"><span class="rank-badge">#${myRank}</span><span>${escapeHTML(myData.name)} (أنت)<small class="rank-subtext">${Number(myData.days) || 0} يوم دراسة</small></span></span><span class="rank-time">${formatHoursLabel(myData.time)}</span></div></div>`;
+                    } else { myCont.innerHTML = ""; }
+                }
+            }, () => { showOfflineNotice(document.getElementById('ranksCont')); });
+        }
+        function closeLeaderboard() { document.getElementById('leaderboardModal').style.display = 'none'; if (document.getElementById('authModal').style.display !== 'block') document.getElementById('overlay').style.display = 'none'; if (firebaseReady && leaderboardListener) db.ref(`leaderboard_weeks/${getWeekKey()}`).off('value', leaderboardListener); }
+
+        const canvas = document.getElementById('snowCanvas'); const ctx = canvas.getContext('2d'); let w, h, flakes = [];
+        function res() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; } window.onresize = res; res();
+        class Flake { constructor() { this.reset(); } reset() { this.x = Math.random()*w; this.y = Math.random()*h; this.s = Math.random()*0.5+0.2; this.r = Math.random()*2+1; } update() { this.y += this.s; if(this.y > h) this.y = -10; } draw() { ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill(); } }
+        for(let i=0; i<70; i++) flakes.push(new Flake());
+        function anim() { ctx.clearRect(0,0,w,h); flakes.forEach(f=>{f.update(); f.draw();}); requestAnimationFrame(anim); } anim();
+
+        function formatDateKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
+        
+        function getWeekStart(date = new Date()) { const d = new Date(date); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 2) % 7)); return d; }
+        
+        function getWeekKey(date = new Date()) { return formatDateKey(getWeekStart(date)); }
+        function formatSeconds(s) { return new Date(Math.max(0, s) * 1000).toISOString().slice(11, 19); }
+        function formatHoursLabel(s) { return `${(s / 3600).toFixed(1)} س`; }
+        function getWeeklyTotalSeconds() { 
+            return Object.values(studyData.days || {}).reduce((sum, secs) => {
+                let safeSecs = Number(secs) || 0;
+                // منع تسجيل أكثر من 24 ساعة في اليوم الواحد (86400 ثانية)
+                if (safeSecs > 86400) safeSecs = 86400; 
+                if (safeSecs < 0) safeSecs = 0;
+                return sum + safeSecs;
+            }, 0); 
+        }
+        function getWeeklyStudyDays() { return Object.values(studyData.days || {}).filter(secs => secs > 0).length; }
+
+        let studyData = JSON.parse(localStorage.getItem('khulasa_study_data')) || { weekKey: getWeekKey(), days: {}, dailyGoal: 9 };
+        if (!studyData.days) studyData.days = {}; if (!studyData.weekKey) studyData.weekKey = getWeekKey(); if (!studyData.dailyGoal) studyData.dailyGoal = 9;
+
+        function ensureWeeklyReset() { const currentWeekKey = getWeekKey(); if (studyData.weekKey !== currentWeekKey) { studyData.weekKey = currentWeekKey; studyData.days = {}; localStorage.setItem('khulasa_study_data', JSON.stringify(studyData)); } }
+        function renderHistory() {
+            const historyList = document.getElementById('historyList'); const entries = Object.entries(studyData.days || {}).sort((a, b) => new Date(b[0]) - new Date(a[0]));
+            if (!entries.length) { historyList.innerHTML = '<li class="history-item"><span>ماكو ساعات مسجلة هذا الأسبوع</span><span>0.0 س</span></li>'; return; }
+            historyList.innerHTML = entries.map(([dateKey, seconds]) => `<li class="history-item"><div><strong>${new Date(dateKey).toLocaleDateString('ar-IQ', {weekday: 'long', month: 'short', day: 'numeric'})}</strong><small>سجل اليوم</small></div><span>${formatHoursLabel(seconds)}</span></li>`).join('');
+        }
+        function resetToday() { studyData.days[formatDateKey()] = 0; saveDataLocal(); syncToFirebase(); }
+        
+        function saveDataLocal() { ensureWeeklyReset(); localStorage.setItem('khulasa_study_data', JSON.stringify(studyData)); updateDisplay(); }
+
+        const workerCode = `
+            let timer;
+            self.onmessage = function(e) {
+                if (e.data === 'start') {
+                    timer = setInterval(() => self.postMessage('tick'), 1000);
+                } else if (e.data === 'stop') {
+                    clearInterval(timer);
+                }
+            };
+        `;
+        const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+        const timerWorker = new Worker(URL.createObjectURL(workerBlob));
+
+        let timeLeft = 1500, currentSessionTotal = 1500, isRunning = false, isPaused = false, isBreak = false, endTime;
+        let shownMilestones = new Set();
+        const circle = document.querySelector('.progress-ring__circle'); const radius = 95; const circumference = radius * 2 * Math.PI;
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+
+        function saveTimerState() { localStorage.setItem('kh_timer_state', JSON.stringify({ isRunning, isBreak, endTime, currentSessionTotal, lastTick: Date.now() })); }
+
+        async function requestScreenWakeLock() {
+            try {
+                if ('wakeLock' in navigator && wakeLock === null) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {}
+        }
+        function releaseScreenWakeLock() {
+            if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
+        }
+
+        function restoreSession() {
+            let state = JSON.parse(localStorage.getItem('kh_timer_state'));
+            if (state && state.isRunning) {
+                let now = Date.now();
+                if (state.endTime > now) {
+                    let missedSecs = (now - state.lastTick) / 1000;
+                    if (!state.isBreak && missedSecs > 0) { let t = formatDateKey(); studyData.days[t] = (studyData.days[t] || 0) + missedSecs; saveDataLocal(); syncToFirebase(); }
+                    timeLeft = Math.round((state.endTime - now)/1000); isBreak = state.isBreak; currentSessionTotal = state.currentSessionTotal; startTimer(true);
+                } else {
+                    let missedSecs = (state.endTime - state.lastTick) / 1000;
+                    if (!state.isBreak && missedSecs > 0) { let t = formatDateKey(); studyData.days[t] = (studyData.days[t] || 0) + missedSecs; saveDataLocal(); syncToFirebase(); }
+                    localStorage.removeItem('kh_timer_state');
+                    const finishedBreak = state.isBreak;
+                    isBreak = state.isBreak; switchCycle();
+                    // المتصفحات تمنع تشغيل الصوت تلقائياً بدون تفاعل المستخدم، فنحاول الصوت فقط لو كان مسموحاً مسبقاً،
+                    // وفي كل الحالات نوضّح بالنص إنك خلصت جلسة كاملة وانت غايب عن الصفحة.
+                    setTimeout(() => {
+                        if (audioCtx.state === 'running') playPhoneAlarm();
+                        const box = document.getElementById('motivation-box');
+                        box.innerText = finishedBreak ? 'استراحتك خلصت وانت غايب، يلا رجعنا للتركيز 💪' : 'هلا بعودتك! جلستك السابقة خلصت وانت غايب وتسجل وقتك كامل ✅';
+                        box.style.opacity = 1;
+                    }, 400);
+                }
+            }
+        }
+
+        function updateDisplay() {
+            ensureWeeklyReset(); let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            document.getElementById('totalStudy').innerText = formatSeconds(studyData.days[formatDateKey()] || 0);
+            document.getElementById('goalStudy').innerText = formatSeconds(Number(studyData.dailyGoal) * 3600);
+            document.getElementById('dailyGoalSelect').value = String(studyData.dailyGoal); renderHistory();
+            circle.style.strokeDashoffset = circumference - (((currentSessionTotal - timeLeft) / currentSessionTotal) * circumference);
+            circle.style.stroke = isBreak ? "var(--break-blue)" : "var(--deep-gold)";
+        }
+
+        function startTimer(isRestoring = false) {
+            if (isRunning && !isRestoring) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            requestNotifyPermission();
+            isRunning = true; isPaused = false;
+            requestScreenWakeLock(); 
+            
+            if (!isRestoring) { shownMilestones = new Set(); resetSessionQuotes(); endTime = Date.now() + (timeLeft * 1000); }
+            document.getElementById('mainBtn').style.display = "none"; document.getElementById('secControls').style.display = "flex";
+            
+            timerWorker.postMessage('stop'); 
+            timerWorker.postMessage('start'); 
+        }
+
+        timerWorker.onmessage = function() {
+            if (!isPaused && isRunning) {
+                const previousTimeLeft = timeLeft; const remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+                if (remaining <= 3 && remaining > 0) playSound(880, 0.1); if (remaining === 0) { playPhoneAlarm(); notifySessionEnd(isBreak); }
+                timeLeft = remaining; const elapsed = Math.max(0, previousTimeLeft - timeLeft);
+                
+                if (!isBreak && elapsed > 0) { 
+                    const t = formatDateKey(); studyData.days[t] = (studyData.days[t] || 0) + elapsed; saveDataLocal(); 
+                    unsyncedSeconds += elapsed;
+                    if (unsyncedSeconds >= 60) { syncToFirebase(); unsyncedSeconds = 0; }
+                } else { updateDisplay(); }
+                
+                saveTimerState();
+                if (!isBreak) { getCrossedMilestones(previousTimeLeft, timeLeft, currentSessionTotal).forEach(mark => { if (!shownMilestones.has(mark)) { shownMilestones.add(mark); showMotivation(mark); } }); }
+                if (timeLeft <= 0) switchCycle();
+            } else if (isPaused) { endTime = Date.now() + (timeLeft * 1000); }
+        };
+
+        function setMode(work, rest, id) {
+            timerWorker.postMessage('stop'); isRunning = false; isPaused = false; isBreak = false;
+            releaseScreenWakeLock();
+            shownMilestones = new Set(); resetSessionQuotes(); timeLeft = work * 60; currentSessionTotal = timeLeft; localStorage.removeItem('kh_timer_state');
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active');
+            document.getElementById('mainBtn').style.display = "block"; document.getElementById('secControls').style.display = "none";
+            document.getElementById('pauseBtn').innerText = "إيقاف مؤقت"; document.getElementById('status').textContent = "Study with خلاصة"; document.getElementById('motivation-box').setAttribute('dir', 'rtl'); document.getElementById('motivation-box').innerText = ""; updateDisplay();
+        }
+
+        function togglePause() { 
+            isPaused = !isPaused; 
+            document.getElementById('pauseBtn').innerText = isPaused ? "استئناف" : "إيقاف مؤقت"; 
+            if (isPaused) {
+                if (unsyncedSeconds > 0) { syncToFirebase(); unsyncedSeconds = 0; }
+                releaseScreenWakeLock();
+            } else { requestScreenWakeLock(); }
+        }
+        
+        function switchCycle() {
+            if (unsyncedSeconds > 0) { syncToFirebase(); unsyncedSeconds = 0; }
+            isBreak = !isBreak; 
+            
+            const isCustom = document.getElementById('mCustom').classList.contains('active');
+            const isLongMode = document.getElementById('m45').classList.contains('active');
+            
+            if (isCustom) {
+                let cb = parseInt(localStorage.getItem('kh_cust_b')) || 0;
+                let cw = parseInt(localStorage.getItem('kh_cust_w')) || 60;
+                
+                if (isBreak && cb === 0) {
+                    timerWorker.postMessage('stop');
+                    releaseScreenWakeLock();
+                    isRunning = false; isPaused = false;
+                    processSurrender();
+                    return;
+                }
+                timeLeft = (isBreak ? cb : cw) * 60;
+            } else {
+                timeLeft = (isBreak ? (isLongMode ? 10 : 5) : (isLongMode ? 45 : 25)) * 60; 
+            }
+
+            currentSessionTotal = timeLeft; shownMilestones = new Set();
+            if (!isBreak) resetSessionQuotes(); endTime = Date.now() + (timeLeft * 1000);
+            document.getElementById('status').textContent = isBreak ? "استراحة ☕" : "وقت التركيز ✍️"; document.getElementById('motivation-box').setAttribute('dir', 'rtl'); document.getElementById('motivation-box').innerText = isBreak ? "خذ نفس وارجع بقوة" : "";
+            saveTimerState(); startTimer(true); updateDisplay();
+        }
+
+        function surrender() { document.getElementById('surrenderConfirmModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
+        function closeSurrenderConfirm() { document.getElementById('surrenderConfirmModal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
+
+        function processSurrender() {
+            closeSurrenderConfirm();
+            if (unsyncedSeconds > 0) { syncToFirebase(); unsyncedSeconds = 0; }
+            timerWorker.postMessage('stop'); isRunning = false; isPaused = false; isBreak = false;
+            releaseScreenWakeLock();
+            shownMilestones = new Set(); resetSessionQuotes(); localStorage.removeItem('kh_timer_state');
+
+            const today = formatDateKey(); const studiedToday = studyData.days[today] || 0; const targetGoalSeconds = Number(studyData.dailyGoal) * 3600;
+            let percent = targetGoalSeconds ? (studiedToday / targetGoalSeconds) * 100 : 0; if (percent > 100) percent = 100;
+
+            let evalMsg = ""; let evalColor = "";
+            if (percent < 20) { evalMsg = "بداية متعثرة، تحتاج تركيز أكبر الجلسة القادمة 🚶‍♂️"; evalColor = "#e74c3c"; } 
+            else if (percent < 40) { evalMsg = "جهد مقبول، لكن المشوار طويل 🏃‍♂️"; evalColor = "#e67e22"; } 
+            else if (percent < 60) { evalMsg = "نصف الطريق! أداء جيد استمر 🔥"; evalColor = "#f1c40f"; } 
+            else if (percent < 85) { evalMsg = "بطل! إنجاز رائع وقريب من الهدف 🌟"; evalColor = "#2ecc71"; } 
+            else if (percent < 100) { evalMsg = "أسطورة! قاب قوسين أو أدنى من التقفيل 👑"; evalColor = "#3498db"; } 
+            else { evalMsg = "وحش السادس! حققت الهدف بالكامل 🏆"; evalColor = "var(--gold)"; } 
+
+            document.getElementById('evaluationModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
+            const circle = document.getElementById('evalPercent'); circle.innerText = percent.toFixed(1) + "%"; circle.style.borderColor = evalColor; circle.style.color = evalColor;
+            const msgEl = document.getElementById('evalMessage'); msgEl.innerText = evalMsg; msgEl.style.color = evalColor;
+            document.getElementById('evalGoalVal').innerText = formatHoursLabel(targetGoalSeconds); document.getElementById('evalStudiedVal').innerText = formatHoursLabel(studiedToday);
+
+            if (document.getElementById('mCustom').classList.contains('active')) {
+                timeLeft = (parseInt(localStorage.getItem('kh_cust_w')) || 60) * 60;
+            } else {
+                timeLeft = (document.getElementById('m45').classList.contains('active') ? 45 : 25) * 60;
+            }
+            
+            currentSessionTotal = timeLeft; document.getElementById('mainBtn').style.display = "block"; document.getElementById('secControls').style.display = "none";
+            document.getElementById('pauseBtn').innerText = "إيقاف مؤقت"; document.getElementById('status').textContent = "Study with خلاصة"; document.getElementById('motivation-box').setAttribute('dir', 'rtl'); document.getElementById('motivation-box').innerText = ""; updateDisplay();
+        }
+
+        function closeEvaluation() { document.getElementById('evaluationModal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
+        function updateGoal() { studyData.dailyGoal = document.getElementById('dailyGoalSelect').value; saveDataLocal(); }
+        document.getElementById('loginPassInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') loginUser(); });
+        document.getElementById('loginNameInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('loginPassInput').focus(); } });
+        document.getElementById('signupNameInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('signupPassInput').focus(); } });
+        document.getElementById('signupPassInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('signupConfirmInput').focus(); } });
+        document.getElementById('signupConfirmInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') signupUser(); });
+        document.getElementById('currentPassInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('newPassInput').focus(); } });
+        document.getElementById('newPassInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('newPassConfirmInput').focus(); } });
+        document.getElementById('newPassConfirmInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitChangePassword(); });
+
+        if (firebaseReady && uNameKey) {
+            setupPresence();
+            db.ref(`users_data/${uNameKey}/studyData`).once('value', snap => {
+                if (snap.exists()) {
+                    let cloudData = snap.val();
+                    if (cloudData.weekKey === getWeekKey()) {
+                        for (let d in cloudData.days) { studyData.days[d] = Math.max(studyData.days[d] || 0, cloudData.days[d]); } saveDataLocal();
+                    }
+                }
+            }).catch(() => {});
+        }
+        
+        window.addEventListener('beforeunload', () => { if (unsyncedSeconds > 0) { syncToFirebase(); } releaseScreenWakeLock(); });
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible' && isRunning && !isPaused) { requestScreenWakeLock(); }
+        });
+
+        restoreSession(); updateDisplay();
+    </script>
+</body>
+</html>
