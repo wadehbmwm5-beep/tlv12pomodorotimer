@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // تطبيق الوضع المحفوظ (صباحي/ليلي) قبل رسم الصفحة حتى ما يومض الوضع الثاني لحظة
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('kh_theme'); } catch (e) {}
+            document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+        })();
+    </script>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- ضع هذا السطر داخل الـ <head> -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <title>Study with خلاصة</title>
     <meta name="theme-color" content="#050505">
@@ -24,28 +31,85 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
+        /* ===== ألوان الوضع الليلي (الافتراضي) ===== */
         :root {
             --deep-gold: #c5a059;
             --light-gold: #f1d38e;
+            --gold-fill: #c5a059;
+            --gold-grad: linear-gradient(45deg, #c5a059, #f1d38e);
+            --on-gold: #000;
             --break-blue: #3498db;
             --bg-black: #050505;
             --card-bg: rgba(18, 18, 18, 0.9);
             --border-color: rgba(197, 160, 89, 0.2);
             --pause-color: #e67e22;
             --surrender-color: #e74c3c;
+            --ok-color: #2ecc71;
             --gold: #FFD700;
             --silver: #C0C0C0;
             --bronze: #CD7F32;
+            --text: #ffffff;
+            --text-2: #cccccc;
+            --muted: #a3a3a3;
+            --faint: #8f8f8f;
+            --fill: rgba(255, 255, 255, 0.04);
+            --fill-2: rgba(255, 255, 255, 0.08);
+            --line: rgba(255, 255, 255, 0.1);
+            --line-strong: rgba(255, 255, 255, 0.22);
+            --btn-dark: #1a1a1a;
+            --overlay: rgba(0, 0, 0, 0.85);
+            --shadow: rgba(0, 0, 0, 0.6);
+            --title-grad: linear-gradient(to bottom, #fff, #c5a059);
+            --select-bg: #000;
+            --eval-bg: rgba(0, 0, 0, 0.5);
+            --eval-1: #e74c3c; --eval-2: #e67e22; --eval-3: #f1c40f; --eval-4: #2ecc71; --eval-5: #3498db;
+            color-scheme: dark;
+        }
+
+        /* ===== ألوان الوضع الصباحي ===== */
+        :root[data-theme="light"] {
+            --deep-gold: #9a7028;
+            --light-gold: #7e5a17;
+            --gold-fill: #c9a253;
+            --gold-grad: linear-gradient(45deg, #c9a253, #e8cb86);
+            --on-gold: #1a1100;
+            --break-blue: #1f6fb2;
+            --bg-black: #f6f2ea;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --border-color: rgba(154, 112, 40, 0.24);
+            --pause-color: #b85e0f;
+            --surrender-color: #c0392b;
+            --ok-color: #1e8e4e;
+            --gold: #a67c00;
+            --silver: #626b78;
+            --bronze: #9a5b1e;
+            --text: #1b1710;
+            --text-2: #3d372d;
+            --muted: #6b6457;
+            --faint: #746d60;
+            --fill: rgba(60, 45, 20, 0.04);
+            --fill-2: rgba(60, 45, 20, 0.08);
+            --line: rgba(60, 45, 20, 0.12);
+            --line-strong: rgba(60, 45, 20, 0.24);
+            --btn-dark: #ffffff;
+            --overlay: rgba(30, 24, 14, 0.45);
+            --shadow: rgba(80, 60, 20, 0.16);
+            --title-grad: linear-gradient(to bottom, #2a2216, #9a7028);
+            --select-bg: #ffffff;
+            --eval-bg: rgba(255, 255, 255, 0.75);
+            --eval-1: #c0392b; --eval-2: #b85e0f; --eval-3: #8a6d00; --eval-4: #1e8e4e; --eval-5: #1f6fb2;
+            color-scheme: light;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: var(--bg-black); color: #fff;
+            background-color: var(--bg-black); color: var(--text);
             font-family: 'Tajawal', sans-serif; margin: 0;
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; min-height: 100vh; padding: 20px; 
+            justify-content: center; min-height: 100vh; padding: 84px 20px 20px;
             overflow-x: hidden;
+            transition: background-color 0.35s ease, color 0.35s ease;
         }
 
         #snowCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.4; }
@@ -58,231 +122,242 @@
         .nav-btn {
             background: var(--card-bg); border: 1px solid var(--border-color);
             color: var(--light-gold); width: 45px; height: 45px;
-            border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-            transition: 0.3s;
+            border-radius: 50%; cursor: pointer; text-decoration: none;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+            transition: 0.3s; box-shadow: 0 6px 16px -8px var(--shadow);
         }
         .nav-btn:hover { border-color: var(--deep-gold); transform: scale(1.1); }
+        .nav-btn:focus-visible, .action-btn:focus-visible, .mode-btn:focus-visible, .chip-btn:focus-visible, .stepper-btn:focus-visible, .auth-tab:focus-visible, .reset-btn:focus-visible, .close-sidebar:focus-visible { outline: 2px solid var(--deep-gold); outline-offset: 2px; }
+
+        /* زر الرئيسية: نفس شكل أزرار الأعلى، بالزاوية اليسرى */
+        .home-btn {
+            position: fixed; top: 20px; left: 20px; z-index: 100;
+            background: var(--gold-grad); color: var(--on-gold); border-color: transparent;
+        }
+
+        /* زر تبديل الوضع: يظهر القمر بالوضع الصباحي والشمس بالوضع الليلي */
+        .theme-btn .fa-sun { display: inline-block; }
+        .theme-btn .fa-moon { display: none; }
+        :root[data-theme="light"] .theme-btn .fa-sun { display: none; }
+        :root[data-theme="light"] .theme-btn .fa-moon { display: inline-block; }
 
         .sidebar {
             position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
             background: var(--card-bg); backdrop-filter: blur(25px);
-            border-left: 1px solid var(--border-color); z-index: 100;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+            border-left: 1px solid var(--border-color); z-index: 200;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.4s; padding: 25px;
+            box-shadow: -10px 0 30px var(--shadow);
             display: flex; flex-direction: column;
+            visibility: hidden;
         }
-        .sidebar.active { right: 0; }
-        .sidebar-header { 
-            font-weight: 900; color: var(--light-gold); font-size: 1.3rem; 
+        .sidebar.active { right: 0; visibility: visible; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s; }
+        .sidebar-header {
+            font-weight: 900; color: var(--light-gold); font-size: 1.3rem;
             margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .close-sidebar { cursor: pointer; font-size: 1.5rem; color: #fff; }
-        
+        .close-sidebar { cursor: pointer; font-size: 1.5rem; color: var(--text); background: none; border: 0; width: 40px; height: 40px; border-radius: 50%; line-height: 1; font-family: inherit; }
+        .close-sidebar:hover { background: var(--fill-2); }
+
         .history-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
-        .history-item { 
-            background: rgba(255,255,255,0.03); margin-bottom: 10px; padding: 12px; 
+        .history-item {
+            background: var(--fill); margin-bottom: 10px; padding: 12px;
             border-radius: 12px; border-right: 4px solid var(--deep-gold);
             display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;
         }
-        .history-item small { color: #999; display: block; margin-top: 4px; }
+        .history-item small { color: var(--muted); display: block; margin-top: 4px; }
+        .history-item > span:last-child { white-space: nowrap; margin-inline-start: 10px; }
 
         .reset-btn {
-            background: rgba(231, 76, 60, 0.1); color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1); color: var(--surrender-color);
             border: 1px solid rgba(231, 76, 60, 0.3); padding: 12px;
             border-radius: 12px; font-family: 'Tajawal'; font-weight: bold;
             cursor: pointer; margin-top: 15px; transition: 0.3s; font-size: 0.85rem;
         }
+        .reset-btn.gold-btn { width: 100%; margin-top: 10px; background: rgba(197,160,89,0.08); color: var(--light-gold); border-color: rgba(197,160,89,0.3); }
+        .reset-btn.blue-btn { width: 100%; margin-top: 10px; background: rgba(52,152,219,0.08); color: var(--break-blue); border-color: rgba(52,152,219,0.3); }
+        .reset-btn.plain-btn { width: 100%; color: var(--text); background: var(--fill-2); border: 1px solid var(--line-strong); }
 
         .custom-modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px;
             border-radius: 25px; z-index: 250; width: 92%; max-width: 380px; text-align: center;
-            backdrop-filter: blur(25px); box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            backdrop-filter: blur(25px); box-shadow: 0 0 50px var(--shadow);
+            max-height: 92vh; overflow-y: auto;
         }
-        
+
         .rank-list { max-height: 400px; overflow-y: auto; margin-bottom: 15px; padding: 5px; }
-        .leaderboard-meta { margin: 0 0 15px 0; padding: 12px; border-radius: 15px; background: rgba(255,255,255,0.04); color: #cfcfcf; font-size: 0.85rem; }
+        .leaderboard-meta { margin: 0 0 15px 0; padding: 12px; border-radius: 15px; background: var(--fill); color: var(--text-2); font-size: 0.85rem; }
         .leaderboard-meta strong { color: var(--light-gold); }
-        .online-badge { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); padding: 8px 15px; border-radius: 15px; font-weight: bold; font-size: 0.9rem; margin-bottom: 15px; display: inline-block; box-shadow: 0 0 10px rgba(46, 204, 113, 0.1); }
-        
-        .rank-item { display: flex; justify-content: space-between; padding: 14px; margin: 8px 0; border-radius: 15px; font-weight: bold; font-size: 0.95rem; background: rgba(255,255,255,0.04); transition: 0.3s; }
+        .online-badge { background: rgba(46, 204, 113, 0.1); color: var(--ok-color); border: 1px solid rgba(46, 204, 113, 0.3); padding: 8px 15px; border-radius: 15px; font-weight: bold; font-size: 0.9rem; margin-bottom: 15px; display: inline-block; box-shadow: 0 0 10px rgba(46, 204, 113, 0.1); }
+
+        .rank-item { display: flex; justify-content: space-between; padding: 14px; margin: 8px 0; border-radius: 15px; font-weight: bold; font-size: 0.95rem; background: var(--fill); transition: 0.3s; }
         .rank-name { display: flex; align-items: center; gap: 8px; max-width: 72%; text-align: right; }
-        .rank-badge { min-width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); font-size: 0.85rem; }
+        .rank-badge { min-width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--fill-2); font-size: 0.85rem; }
         .rank-time { color: inherit; white-space: nowrap; }
-        .rank-subtext { display: block; color: #9c9c9c; font-size: 0.75rem; margin-top: 3px; }
-        
-        .modal-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; border-radius: 14px; padding: 14px 16px; font-family: 'Tajawal'; font-size: 1rem; outline: none; margin: 5px 0 10px; }
+        .rank-subtext { display: block; color: var(--muted); font-size: 0.75rem; margin-top: 3px; }
+
+        .modal-input { width: 100%; background: var(--fill); border: 1px solid var(--border-color); color: var(--text); border-radius: 14px; padding: 14px 16px; font-family: 'Tajawal'; font-size: 1rem; outline: none; margin: 5px 0 10px; }
+        .modal-input::placeholder { color: var(--faint); }
         .modal-input:focus { border-color: var(--deep-gold); }
-        .helper-text { color: #9c9c9c; font-size: 0.8rem; margin: 0 0 12px; }
+        .helper-text { color: var(--muted); font-size: 0.8rem; margin: 0 0 12px; }
+        .error-text { min-height: 18px; color: var(--surrender-color); }
         .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
         .modal-actions .action-btn { padding: 14px; flex: 1; }
-        .ghost-btn { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid #444; }
-        
-        .modal-title { font-size: 1.4rem; font-weight: 900; margin: 0 0 15px 0; }
-        .danger-text { color: #e74c3c; }
+        .ghost-btn { background: var(--fill-2); color: var(--text); border: 1px solid var(--line-strong); }
+        .danger-btn { background: rgba(231, 76, 60, 0.1); color: var(--surrender-color); border: 1px solid rgba(231, 76, 60, 0.3); }
+
+        .modal-title { font-size: 1.4rem; font-weight: 900; margin: 0 0 15px 0; color: var(--light-gold); }
+        .modal-text { color: var(--text-2); margin-bottom: 10px; font-size: 0.95rem; }
+        .danger-text { color: var(--surrender-color); }
 
         /* === واجهة تخصيص الوقت الحديثة === */
-        .time-picker-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px; margin-bottom: 14px; transition: 0.3s; }
+        .time-picker-block { background: var(--fill); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 14px; transition: 0.3s; }
         .time-picker-block.disabled-block { opacity: 0.35; pointer-events: none; filter: saturate(0.4); }
         .time-picker-label { font-weight: 700; font-size: 0.95rem; color: var(--light-gold); margin-bottom: 12px; text-align: right; }
         .stepper-row { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 14px; }
-        .stepper-btn { width: 42px; height: 42px; min-width: 42px; border-radius: 50%; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--light-gold); font-size: 1.4rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .stepper-btn { width: 42px; height: 42px; min-width: 42px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--fill-2); color: var(--light-gold); font-size: 1.4rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .stepper-btn:active { transform: scale(0.88); background: rgba(197,160,89,0.18); }
-        .stepper-value { min-width: 110px; text-align: center; font-size: 1.8rem; font-weight: 900; color: #fff; font-family: 'Tajawal'; }
-        .stepper-value small { font-size: 0.85rem; font-weight: 500; color: #9c9c9c; margin-right: 4px; }
+        .stepper-value { min-width: 110px; text-align: center; font-size: 1.8rem; font-weight: 900; color: var(--text); font-family: 'Tajawal'; }
+        .stepper-value small { font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-right: 4px; }
         .preset-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-        .chip-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #ccc; padding: 7px 14px; border-radius: 30px; font-family: 'Tajawal'; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .chip-btn.active { background: var(--deep-gold); color: #1a1100; border-color: var(--deep-gold); }
+        .chip-btn { background: var(--fill-2); border: 1px solid var(--border-color); color: var(--text-2); padding: 7px 14px; border-radius: 30px; font-family: 'Tajawal'; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .chip-btn.active { background: var(--gold-fill); color: var(--on-gold); border-color: var(--gold-fill); }
         .chip-btn:active { transform: scale(0.93); }
 
-        .shutdown-toggle-row { display: flex; align-items: center; justify-content: space-between; background: rgba(231,126,34,0.07); border: 1px solid rgba(231,126,34,0.25); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; cursor: pointer; transition: 0.2s; }
+        .shutdown-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(231,126,34,0.07); border: 1px solid rgba(231,126,34,0.25); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; cursor: pointer; transition: 0.2s; text-align: right; }
         .shutdown-toggle-row:active { transform: scale(0.985); }
-        .shutdown-title { font-weight: 800; font-size: 0.92rem; color: #f2a766; }
-        .shutdown-sub { font-size: 0.74rem; color: #9c9c9c; margin-top: 3px; }
-        .switch-track { width: 48px; height: 27px; background: rgba(255,255,255,0.12); border-radius: 30px; position: relative; flex-shrink: 0; transition: 0.25s; border: 1px solid rgba(255,255,255,0.1); }
+        .shutdown-title { font-weight: 800; font-size: 0.92rem; color: var(--pause-color); }
+        .shutdown-sub { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
+        .switch-track { width: 48px; height: 27px; background: var(--fill-2); border-radius: 30px; position: relative; flex-shrink: 0; transition: 0.25s; border: 1px solid var(--line-strong); }
         .switch-track.active { background: var(--pause-color); border-color: var(--pause-color); }
         .switch-thumb { width: 21px; height: 21px; background: #fff; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: 0.25s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
         .switch-track.active .switch-thumb { right: 25px; }
-        .eval-circle { width: 130px; height: 130px; border-radius: 50%; border: 6px solid var(--deep-gold); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; background: rgba(0,0,0,0.5); color: var(--light-gold); box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: 0.3s; }
-        .eval-stats { margin: 15px 0; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.05); }
-        .eval-stats div { display: flex; justify-content: space-between; margin: 8px 0; color: #ccc; }
-        .eval-stats strong { color: #fff; }
+        .eval-circle { width: 130px; height: 130px; border-radius: 50%; border: 6px solid var(--deep-gold); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; background: var(--eval-bg); color: var(--light-gold); box-shadow: 0 0 20px var(--shadow); transition: 0.3s; }
+        .eval-message { font-weight: 900; font-size: 1.1rem; margin-bottom: 10px; }
+        .eval-stats { margin: 15px 0; background: var(--fill); padding: 15px; border-radius: 15px; font-size: 0.95rem; border: 1px solid var(--line); }
+        .eval-stats div { display: flex; justify-content: space-between; margin: 8px 0; color: var(--text-2); }
+        .eval-stats strong { color: var(--text); }
 
         .top1 { background: linear-gradient(90deg, rgba(255,215,0,0.2), transparent); border: 1px solid var(--gold); color: var(--gold); transform: scale(1.05); box-shadow: 0 4px 15px rgba(255,215,0,0.1); }
         .top2 { background: linear-gradient(90deg, rgba(192,192,192,0.15), transparent); border: 1px solid var(--silver); color: var(--silver); }
         .top3 { background: linear-gradient(90deg, rgba(205,127,50,0.15), transparent); border: 1px solid var(--bronze); color: var(--bronze); }
-        .my-rank-out { margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px; color: #aaa; font-style: italic; font-size: 0.85rem; }
+        .my-rank-out { margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px; color: var(--muted); font-style: italic; font-size: 0.85rem; }
         .user-highlight { border: 1px solid var(--deep-gold) !important; background: rgba(197, 160, 89, 0.1) !important; }
 
         .goal-selector-container { margin-bottom: 20px; text-align: center; }
-        .goal-label { font-size: 0.8rem; color: #888; margin-bottom: 8px; display: block; }
-        .custom-select { background: #000; border: 1px solid var(--deep-gold); color: var(--light-gold); padding: 10px 15px; border-radius: 12px; font-family: 'Tajawal'; font-weight: bold; outline: none; cursor: pointer; width: 100%; max-width: 160px; appearance: none; text-align: center; }
+        .goal-label { font-size: 0.8rem; color: var(--faint); margin-bottom: 8px; display: block; }
+        .custom-select { background: var(--select-bg); border: 1px solid var(--deep-gold); color: var(--light-gold); padding: 10px 15px; border-radius: 12px; font-family: 'Tajawal'; font-weight: bold; outline: none; cursor: pointer; width: 100%; max-width: 160px; appearance: none; text-align: center; }
+        .custom-select:focus-visible { outline: 2px solid var(--deep-gold); outline-offset: 2px; }
 
-        .header-title { font-size: clamp(1.5rem, 8vw, 2.2rem); font-weight: 900; background: linear-gradient(to bottom, #fff, var(--deep-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; z-index: 1; }
+        .header-title { font-size: clamp(1.5rem, 8vw, 2.2rem); font-weight: 900; background: var(--title-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; z-index: 1; }
 
-        .timer-container { background: var(--card-bg); border: 1px solid var(--border-color); padding: 30px 20px; border-radius: 35px; width: 100%; max-width: 400px; text-align: center; backdrop-filter: blur(20px); z-index: 1; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .timer-container { background: var(--card-bg); border: 1px solid var(--border-color); padding: 30px 20px; border-radius: 35px; width: 100%; max-width: 400px; text-align: center; backdrop-filter: blur(20px); z-index: 1; box-shadow: 0 20px 50px var(--shadow); transition: background 0.35s ease, box-shadow 0.35s ease; }
 
         .mode-buttons { display: flex; gap: 8px; margin-bottom: 25px; }
-        .mode-btn { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #777; padding: 12px 2px; border-radius: 12px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.3s; }
-        .mode-btn.active { border-color: var(--deep-gold); color: var(--light-gold); background: rgba(197, 160, 89, 0.1); }
+        .mode-btn { flex: 1; background: var(--fill-2); border: 1px solid var(--border-color); color: var(--faint); padding: 12px 2px; border-radius: 12px; cursor: pointer; font-size: 0.8rem; font-weight: bold; font-family: 'Tajawal'; transition: 0.3s; }
+        .mode-btn.active { border-color: var(--deep-gold); color: var(--light-gold); background: rgba(197, 160, 89, 0.12); }
 
         .timer-circle-container { position: relative; width: 210px; height: 210px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; }
         .progress-ring { transform: rotate(-90deg); position: absolute; }
+        .progress-ring__track { stroke: var(--line); }
         .progress-ring__circle { transition: stroke-dashoffset 0.1s linear, stroke 0.3s; stroke: var(--deep-gold); stroke-linecap: round; }
 
         #timer { font-size: 4rem; font-weight: 900; font-variant-numeric: tabular-nums; }
         #status { color: var(--deep-gold); font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
 
-        #motivation-box { min-height: 65px; color: var(--light-gold); font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 10px; transition: 0.5s; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        #motivation-box { min-height: 65px; color: var(--light-gold); font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 10px; transition: 0.5s; }
+        :root:not([data-theme="light"]) #motivation-box { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         .controls-container { display: flex; flex-direction: column; gap: 10px; }
-        .action-btn { width: 100%; padding: 18px; border-radius: 18px; font-size: 1rem; font-weight: 900; cursor: pointer; border: none; transition: 0.3s; }
-        .btn-start { background: linear-gradient(45deg, var(--deep-gold), var(--light-gold)); color: #000; box-shadow: 0 5px 15px rgba(197,160,89,0.3); }
-        
-        .secondary-btns { display: none; gap: 10px; width: 100%; }
-        .btn-pause { background: #1a1a1a; color: var(--pause-color); border: 1px solid var(--pause-color); flex: 1; }
-        .btn-surrender { background: #1a1a1a; color: var(--surrender-color); border: 1px solid var(--surrender-color); flex: 1; }
+        .action-btn { width: 100%; padding: 18px; border-radius: 18px; font-size: 1rem; font-weight: 900; font-family: 'Tajawal'; cursor: pointer; border: none; transition: 0.3s; }
+        .btn-start { background: var(--gold-grad); color: var(--on-gold); box-shadow: 0 5px 15px rgba(197,160,89,0.3); }
 
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 150; }
-        .total-info { margin-top: 20px; font-size: 0.85rem; color: #666; border-top: 1px solid #222; padding-top: 15px; }
+        .secondary-btns { display: none; gap: 10px; width: 100%; }
+        .btn-pause { background: var(--btn-dark); color: var(--pause-color); border: 1px solid var(--pause-color); flex: 1; }
+        .btn-surrender { background: var(--btn-dark); color: var(--surrender-color); border: 1px solid var(--surrender-color); flex: 1; }
+
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); z-index: 150; }
+        .total-info { margin-top: 20px; font-size: 0.85rem; color: var(--faint); border-top: 1px solid var(--line); padding-top: 15px; }
         #totalStudy { color: var(--deep-gold); font-weight: bold; }
-        #goalStudy { color: #444; }
+        #goalStudy { color: var(--muted); font-weight: bold; }
         .extra-links { display: flex; gap: 8px; margin-top: 20px; }
-        .extra-btn { flex: 1; text-decoration: none; padding: 12px; border-radius: 15px; font-size: 0.75rem; border: 1px solid rgba(197,160,89,0.3); color: var(--light-gold); text-align: center; transition: 0.3s; }
+        .extra-btn { flex: 1; text-decoration: none; padding: 12px; border-radius: 15px; font-size: 0.8rem; border: 1px solid rgba(197,160,89,0.3); color: var(--light-gold); text-align: center; transition: 0.3s; }
         .extra-btn:hover { background: rgba(197,160,89,0.1); }
-        .creator-signature { font-size: 0.85rem; color: rgba(255, 255, 255, 0.5); text-decoration: none; margin-top: 30px; display: block; }
+        .creator-signature { font-size: 0.85rem; color: var(--faint); text-decoration: none; margin-top: 30px; display: block; }
         .creator-signature:hover { color: var(--light-gold); }
 
-        .auth-tabs { display: flex; gap: 6px; background: rgba(255,255,255,0.04); border-radius: 14px; padding: 5px; margin-bottom: 18px; }
-        .auth-tab { flex: 1; background: transparent; border: none; color: #888; padding: 11px 5px; border-radius: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
-        .auth-tab.active { background: linear-gradient(45deg, var(--deep-gold), var(--light-gold)); color: #000; }
+        .auth-tabs { display: flex; gap: 6px; background: var(--fill); border-radius: 14px; padding: 5px; margin-bottom: 18px; }
+        .auth-tab { flex: 1; background: transparent; border: none; color: var(--faint); padding: 11px 5px; border-radius: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
+        .auth-tab.active { background: var(--gold-grad); color: var(--on-gold); }
         .auth-pane { text-align: right; }
         .password-field { position: relative; }
         .password-field .modal-input { padding-left: 45px; }
-        .toggle-pass { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.05rem; color: #888; padding: 6px; line-height: 1; }
-        .success-text { color: #2ecc71 !important; }
-        /* إزالة حدود وخلفية الزر الافتراضية */
-.home-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
+        .toggle-pass { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.05rem; color: var(--faint); padding: 6px; line-height: 1; }
+        .success-text { color: var(--ok-color) !important; }
 
-/* التحكم بحجم صورة البيت */
-.home-icon {
-  width: 40px;  /* تحكم بالعرض */
-  height: 40px; /* تحكم بالارتفاع */
-  transition: transform 0.2s ease; /* تأثير حركة لطيف */
-}
 
-/* تكبير الصورة قليلاً عند إشارة الماوس */
-.home-btn:hover .home-icon {
-  transform: scale(1.1);
-}
-/* في الـ CSS */
-.home-btn {
-  background-color: #c5a059;
-  border: none;
-  color: rgb(0, 0, 0);
-  padding: 12px 16px;
-  font-size: 15px; /* يتحكم بحجم أيقونة البيت */
-  border-radius: 30%; /* يجعله زر دائري */
-  cursor: pointer;
-   position: fixed;      /* يجعله ثابتاً في الشاشة */
-    top:20px;            /* المسافة من الأفق/الأعلى */
-    left: 20px;       
-    
-    
-}
-    position: fixed;      /* يجعله ثابتاً في الشاشة */
-    top: 20px;            /* المسافة من الأفق/الأعلى */
-    right: 20px;          /* المسافة من اليمين */
-    
-    /* بقية التنسيقات كما هي */
-    background-color: #007bff;
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    text-decoration: none;
-    z-index: 1000;
+        /* === أصوات التركيز === */
+        .ambient-open { width: 100%; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; background: var(--fill); border: 1px dashed var(--border-color); color: var(--light-gold); padding: 12px 14px; border-radius: 16px; font-family: 'Tajawal'; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: 0.3s; }
+        .ambient-open:hover { border-style: solid; border-color: var(--deep-gold); }
+        .ambient-open:focus-visible { outline: 2px solid var(--deep-gold); outline-offset: 2px; }
+        .ambient-open.playing { border-style: solid; border-color: var(--deep-gold); background: rgba(197,160,89,0.1); }
+        .ambient-open.playing .fa-headphones { animation: ambPulse 1.6s ease-in-out infinite; }
+        @keyframes ambPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+        .ambient-now { color: var(--muted); font-weight: 500; font-size: 0.8rem; }
+        .ambient-modal { max-width: 440px; }
+        .ambient-master { display: flex; align-items: center; gap: 12px; margin: 4px 0 14px; }
+        .ambient-play { flex: none; display: inline-flex; align-items: center; gap: 8px; background: var(--gold-grad); color: var(--on-gold); border: 0; border-radius: 999px; padding: 10px 18px; font-family: 'Tajawal'; font-weight: 900; font-size: 0.92rem; cursor: pointer; }
+        .ambient-play:focus-visible { outline: 2px solid var(--deep-gold); outline-offset: 2px; }
+        .ambient-vol { flex: 1; display: flex; align-items: center; gap: 10px; color: var(--light-gold); min-width: 0; }
+        .ambient-vol input, .amb-vol { width: 100%; accent-color: var(--deep-gold); }
+        .ambient-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+        .amb-tile { background: var(--fill); border: 1px solid var(--line); border-radius: 16px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; transition: 0.25s; min-width: 0; }
+        .amb-tile.on { border-color: var(--deep-gold); background: rgba(197,160,89,0.1); }
+        .amb-toggle { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; color: var(--text-2); font-family: 'Tajawal'; font-weight: 700; font-size: 0.9rem; cursor: pointer; padding: 4px 0; text-align: right; }
+        .amb-toggle:focus-visible { outline: 2px solid var(--deep-gold); outline-offset: 2px; border-radius: 10px; }
+        .amb-toggle i { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--fill-2); color: var(--light-gold); font-size: 1rem; flex: none; transition: 0.25s; }
+        .amb-tile.on .amb-toggle { color: var(--text); }
+        .amb-tile.on .amb-toggle i { background: var(--gold-fill); color: var(--on-gold); }
+        .amb-vol { display: none; }
+        .amb-tile.on .amb-vol { display: block; }
+        .ambient-link { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-2); text-align: right; cursor: pointer; margin-bottom: 4px; }
+        .ambient-link input { width: 18px; height: 18px; accent-color: var(--deep-gold); flex: none; }
+        @media (prefers-reduced-motion: reduce) { .ambient-open.playing .fa-headphones { animation: none; } }
 
+        @media (max-width: 420px) {
+            body { padding-top: 78px; }
+            .timer-container { padding: 26px 16px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+            #snowCanvas { display: none; }
+        }
     </style>
 </head>
 <body>
-<!-- في الـ HTML -->
-<a href="https://tlv-12.vercel.app/">
-  <button class="home-btn">
-    <i class="fas fa-home"></i>
-  </button>
-</a>
+    <a href="https://tlv-12.vercel.app/" class="nav-btn home-btn" title="الرئيسية" aria-label="الرجوع لموقع خلاصة السادس"><i class="fas fa-home" aria-hidden="true"></i></a>
     <canvas id="snowCanvas"></canvas>
     <div id="overlay" onclick="closeAllModals()"></div>
     
     <div class="top-nav">
-        <button class="nav-btn" onclick="initLeaderboard()" title="المتصدرون" aria-label="فتح لوحة المتصدرين">🏆</button>
-        <button class="nav-btn" onclick="toggleSidebar()" title="سجل الإنجاز" aria-label="فتح سجل الإنجاز">📊</button>
+        <button class="nav-btn" onclick="initLeaderboard()" title="المتصدرون" aria-label="فتح لوحة المتصدرين"><i class="fas fa-trophy" aria-hidden="true"></i></button>
+        <button class="nav-btn" onclick="toggleSidebar()" title="سجل الإنجاز" aria-label="فتح سجل الإنجاز"><i class="fas fa-chart-simple" aria-hidden="true"></i></button>
+        <button class="nav-btn theme-btn" id="themeToggle" onclick="toggleTheme()" title="الوضع الصباحي" aria-label="التبديل للوضع الصباحي"><i class="fas fa-sun" aria-hidden="true"></i><i class="fas fa-moon" aria-hidden="true"></i></button>
     </div>
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <span>سجل الإنجاز 🏆</span>
-            <span class="close-sidebar" onclick="toggleSidebar()" role="button" tabindex="0" aria-label="إغلاق السجل">×</span>
+            <button type="button" class="close-sidebar" onclick="toggleSidebar()" aria-label="إغلاق السجل">×</button>
         </div>
         <ul class="history-list" id="historyList"></ul>
         <button class="reset-btn" onclick="resetToday()">🔄 تصفير إنجاز اليوم</button>
     </div>
 
     <div id="customTimerModal" class="custom-modal">
-        <h3 class="modal-title" style="color: var(--light-gold);">إعداد عداد مخصص ⚙️</h3>
+        <h3 class="modal-title">إعداد عداد مخصص ⚙️</h3>
 
         <div class="time-picker-block">
             <div class="time-picker-label">⏱️ وقت التركيز</div>
@@ -318,15 +393,30 @@
         </div>
     </div>
 
+    <div id="ambientModal" class="custom-modal ambient-modal" role="dialog" aria-labelledby="ambientTitle">
+        <h3 class="modal-title" id="ambientTitle">أصوات التركيز 🎧</h3>
+        <p class="helper-text">اختر صوت أو أكثر وامزجها سوا. الأصوات تتولد داخل متصفحك، فما تحتاج تحميل ولا إنترنت.</p>
+        <div class="ambient-master">
+            <button type="button" class="ambient-play" id="ambientPlayBtn" onclick="Ambient.togglePlay()"><i class="fas fa-play" aria-hidden="true"></i><span>تشغيل</span></button>
+            <label class="ambient-vol"><i class="fas fa-volume-high" aria-hidden="true"></i><input type="range" id="ambientMaster" min="0" max="100" value="80" aria-label="الصوت العام"></label>
+        </div>
+        <div class="ambient-grid" id="ambientGrid"></div>
+        <label class="ambient-link"><input type="checkbox" id="ambientLink" checked> تشتغل مع بداية التركيز، وتسكت بالاستراحة والإيقاف المؤقت</label>
+        <div class="modal-actions">
+            <button class="action-btn ghost-btn" onclick="Ambient.stopAll()">إيقاف الكل</button>
+            <button class="action-btn btn-start" onclick="closeAmbientModal()">تم</button>
+        </div>
+    </div>
+
     <div id="leaderboardModal" class="custom-modal">
-        <h3 class="modal-title" style="color: var(--light-gold);">أبطال الأسبوع 🔥</h3>
+        <h3 class="modal-title">أبطال الأسبوع 🔥</h3>
         <div class="online-badge" id="onlineCounter">🟢 يدرسون الآن: 0</div>
         <div class="leaderboard-meta" id="leaderboardMeta">جاري تحميل ملخص الأسبوع...</div>
         <div class="rank-list" id="ranksCont">جاري التحميل...</div>
         <div id="myStatusCont"></div>
-        <button class="reset-btn" style="width:100%; margin-top: 10px; background: rgba(197,160,89,0.08); color: var(--light-gold); border-color: rgba(197,160,89,0.3);" onclick="openAuthModal('login', true)">تبديل الحساب</button>
-        <button class="reset-btn" style="width:100%; margin-top: 10px; background: rgba(52,152,219,0.08); color: var(--break-blue); border-color: rgba(52,152,219,0.3);" onclick="openChangePassModal()">تغيير كلمة المرور 🔑</button>
-        <button class="reset-btn" style="width:100%; color:#fff; background: rgba(255,255,255,0.1); border: 1px solid #444;" onclick="closeLeaderboard()">إغلاق</button>
+        <button class="reset-btn gold-btn" onclick="openAuthModal('login', true)">تبديل الحساب</button>
+        <button class="reset-btn blue-btn" onclick="openChangePassModal()">تغيير كلمة المرور 🔑</button>
+        <button class="reset-btn plain-btn" onclick="closeLeaderboard()">إغلاق</button>
     </div>
 
     <div id="authModal" class="custom-modal">
@@ -342,7 +432,7 @@
                 <input id="loginPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور">
                 <button type="button" class="toggle-pass" onclick="togglePassVisibility('loginPassInput', this)">👁️</button>
             </div>
-            <div class="helper-text" id="loginError" style="min-height: 18px; color: #e74c3c;"></div>
+            <div class="helper-text error-text" id="loginError"></div>
             <div class="modal-actions">
                 <button class="action-btn btn-start" id="loginBtn" onclick="loginUser()">دخول</button>
                 <button class="action-btn ghost-btn" onclick="closeAuthModal()">إلغاء</button>
@@ -360,7 +450,7 @@
                 <input id="signupConfirmInput" class="modal-input" type="password" maxlength="20" placeholder="تأكيد كلمة المرور">
                 <button type="button" class="toggle-pass" onclick="togglePassVisibility('signupConfirmInput', this)">👁️</button>
             </div>
-            <div class="helper-text" id="signupError" style="min-height: 18px; color: #e74c3c;"></div>
+            <div class="helper-text error-text" id="signupError"></div>
             <div class="modal-actions">
                 <button class="action-btn btn-start" id="signupBtn" onclick="signupUser()">إنشاء الحساب</button>
                 <button class="action-btn ghost-btn" onclick="closeAuthModal()">إلغاء</button>
@@ -369,7 +459,7 @@
     </div>
 
     <div id="changePassModal" class="custom-modal">
-        <h3 class="modal-title" style="color: var(--light-gold);">تغيير كلمة المرور 🔑</h3>
+        <h3 class="modal-title">تغيير كلمة المرور 🔑</h3>
         <p class="helper-text">أدخل كلمة مرورك الحالية، ثم كلمة المرور الجديدة.</p>
         <div class="password-field">
             <input id="currentPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور الحالية">
@@ -383,7 +473,7 @@
             <input id="newPassConfirmInput" class="modal-input" type="password" maxlength="20" placeholder="تأكيد كلمة المرور الجديدة">
             <button type="button" class="toggle-pass" onclick="togglePassVisibility('newPassConfirmInput', this)">👁️</button>
         </div>
-        <div class="helper-text" id="changePassError" style="min-height: 18px; color: #e74c3c;"></div>
+        <div class="helper-text error-text" id="changePassError"></div>
         <div class="modal-actions">
             <button class="action-btn btn-start" id="changePassBtn" onclick="submitChangePassword()">حفظ كلمة المرور</button>
             <button class="action-btn ghost-btn" onclick="closeChangePassModal()">إلغاء</button>
@@ -392,17 +482,17 @@
 
     <div id="surrenderConfirmModal" class="custom-modal">
         <h3 class="modal-title danger-text">تأكيد الاستسلام ⚠️</h3>
-        <p style="color: #ccc; margin-bottom: 10px; font-size: 0.95rem;">هل أنت متأكد أنك تريد إنهاء جلسة الدراسة الآن والحصول على تقييمك؟</p>
+        <p class="modal-text">هل أنت متأكد أنك تريد إنهاء جلسة الدراسة الآن والحصول على تقييمك؟</p>
         <div class="modal-actions">
-            <button class="action-btn" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3);" onclick="processSurrender()">نعم، أنهِ الجلسة</button>
+            <button class="action-btn danger-btn" onclick="processSurrender()">نعم، أنهِ الجلسة</button>
             <button class="action-btn btn-start" onclick="closeSurrenderConfirm()">تراجع واكمل</button>
         </div>
     </div>
 
     <div id="evaluationModal" class="custom-modal">
-        <h3 class="modal-title" style="color: var(--light-gold);">حصيلة اليوم 📊</h3>
+        <h3 class="modal-title">حصيلة اليوم 📊</h3>
         <div class="eval-circle" id="evalPercent">0%</div>
-        <p id="evalMessage" style="font-weight: 900; font-size: 1.1rem; margin-bottom: 10px;"></p>
+        <p id="evalMessage" class="eval-message"></p>
         <div class="eval-stats">
             <div><span>الهدف اليومي المخطط:</span> <strong id="evalGoalVal">0 س</strong></div>
             <div><span>ما تم إنجازه فعلياً:</span> <strong id="evalStudiedVal">0 س</strong></div>
@@ -433,6 +523,7 @@
 
         <div class="timer-circle-container">
             <svg class="progress-ring" width="210" height="210">
+                <circle class="progress-ring__track" stroke-width="6" fill="transparent" r="95" cx="105" cy="105"/>
                 <circle class="progress-ring__circle" stroke-width="6" fill="transparent" r="95" cx="105" cy="105"/>
             </svg>
             <div id="timer">25:00</div>
@@ -447,6 +538,10 @@
                 <button class="action-btn btn-surrender" id="surrenderBtn" onclick="surrender()">الاستسلام 🛑</button>
             </div>
         </div>
+
+        <button type="button" class="ambient-open" id="ambientOpenBtn" onclick="openAmbientModal()">
+            <i class="fas fa-headphones" aria-hidden="true"></i><span>أصوات التركيز</span><span class="ambient-now" id="ambientNow">مطفأة</span>
+        </button>
 
         <div class="total-info">إجمالي دراسة اليوم: <span id="totalStudy">00:00:00</span> من <span id="goalStudy">09:00:00</span></div>
         
@@ -486,6 +581,332 @@
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startAt + note.time); osc.stop(startAt + note.time + note.duration);
             });
         }
+
+        // ===== أصوات التركيز =====
+        // كل الأصوات تتولد داخل المتصفح بالـ Web Audio: بدون ملفات صوت، بدون إنترنت، وبدون حقوق نشر.
+        // كل صوت مكوّن من طبقات ضجيج مفلترة وأحداث صغيرة (قطرات، طقطقة نار، كلام بعيد، طيور) تدور بحلقة بدون قطع.
+        const Ambient = (function () {
+            const SOUNDS = [
+                { id: 'rain',   name: 'مطر',          icon: 'fa-cloud-rain',  vol: 0.7 },
+                { id: 'storm',  name: 'عاصفة ورعد',   icon: 'fa-cloud-bolt',  vol: 0.6 },
+                { id: 'waves',  name: 'أمواج البحر',   icon: 'fa-water',       vol: 0.6 },
+                { id: 'wind',   name: 'رياح',          icon: 'fa-wind',        vol: 0.5 },
+                { id: 'fire',   name: 'نار المدفأة',   icon: 'fa-fire',        vol: 0.6 },
+                { id: 'cafe',   name: 'مقهى مزدحم',    icon: 'fa-mug-hot',     vol: 0.65 },
+                { id: 'forest', name: 'غابة وطيور',    icon: 'fa-dove',        vol: 0.55 },
+                { id: 'brown',  name: 'ضجيج بني',      icon: 'fa-wave-square', vol: 0.5 }
+            ];
+            let ctx = null, master = null, playing = false;
+            const active = {};
+            let st = { sel: [], vol: {}, master: 0.8, link: true };
+            try { const saved = JSON.parse(localStorage.getItem('kh_ambient') || 'null'); if (saved && typeof saved === 'object') st = Object.assign(st, saved); } catch (e) {}
+            if (!Array.isArray(st.sel)) st.sel = [];
+            st.sel = st.sel.filter(id => SOUNDS.some(s => s.id === id));
+            if (!st.vol || typeof st.vol !== 'object') st.vol = {};
+            function save() { try { localStorage.setItem('kh_ambient', JSON.stringify(st)); } catch (e) {} }
+            function info(id) { return SOUNDS.find(s => s.id === id); }
+            function volOf(id) { return typeof st.vol[id] === 'number' ? st.vol[id] : info(id).vol; }
+
+            // ---------- مولدات الصوت ----------
+            function rand(a, b) { return a + Math.random() * (b - a); }
+            function fillNoise(d, type) {
+                let last = 0, b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                for (let i = 0; i < d.length; i++) {
+                    const w = Math.random() * 2 - 1;
+                    if (type === 'brown') { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+                    else if (type === 'pink') {
+                        b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852;
+                        b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898;
+                        d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926;
+                    } else d[i] = w * 0.5;
+                }
+                return d;
+            }
+            // حلقة بدون "طقة": الذيل الزايد يندمج بالبداية بتلاشي متساوي القدرة
+            function loopBuffer(c, seconds, fill) {
+                const sr = c.sampleRate, n = Math.floor(seconds * sr), K = Math.floor(0.3 * sr);
+                const b = c.createBuffer(2, n, sr);
+                for (let ch = 0; ch < 2; ch++) {
+                    const tmp = new Float32Array(n + K);
+                    fill(tmp, ch, sr, n);
+                    const d = b.getChannelData(ch);
+                    d.set(tmp.subarray(0, n));
+                    for (let i = 0; i < K; i++) { const t = i / K; d[i] = tmp[i] * Math.sin(t * Math.PI / 2) + tmp[n + i] * Math.cos(t * Math.PI / 2); }
+                }
+                return b;
+            }
+            function drops(d, sr, perSec, amp, fLo, fHi) {
+                const n = d.length, count = Math.floor(n / sr * perSec);
+                for (let k = 0; k < count; k++) {
+                    const s0 = Math.floor(Math.random() * n), f = rand(fLo, fHi), dec = rand(0.002, 0.009), a = amp * Math.pow(Math.random(), 1.6);
+                    const len = Math.min(n - s0, Math.floor(dec * 7 * sr)), w = 2 * Math.PI * f / sr, ds = dec * sr;
+                    for (let i = 0; i < len; i++) d[s0 + i] += a * Math.sin(w * i) * Math.exp(-i / ds);
+                }
+            }
+            function crackles(d, sr, perSec) {
+                const n = d.length, count = Math.floor(n / sr * perSec);
+                for (let k = 0; k < count; k++) {
+                    let s0 = Math.floor(Math.random() * n);
+                    const burst = Math.random() < 0.2 ? Math.floor(rand(3, 7)) : 1;
+                    for (let b = 0; b < burst; b++) {
+                        const a = 0.1 + 0.8 * Math.pow(Math.random(), 5), len = Math.max(8, Math.floor(rand(0.0006, 0.004) * sr));
+                        for (let i = 0; i < len && s0 + i < n; i++) d[s0 + i] += a * (Math.random() * 2 - 1) * Math.exp(-i / (len / 4));
+                        s0 += Math.floor(rand(0.01, 0.06) * sr);
+                    }
+                }
+            }
+            function tone(d, s0, len, sr, f1, f2, a, am, vib) {
+                let ph = 0;
+                for (let i = 0; i < len && s0 + i < d.length; i++) {
+                    const p = i / len, f = f1 + (f2 - f1) * p + (vib ? f1 * 0.03 * Math.sin(2 * Math.PI * vib * i / sr) : 0);
+                    ph += 2 * Math.PI * f / sr;
+                    let e = Math.sin(Math.PI * p); e *= e;
+                    if (am) e *= 0.5 + 0.5 * Math.sin(2 * Math.PI * am * i / sr);
+                    d[s0 + i] += a * e * Math.sin(ph);
+                }
+            }
+            // أمواج: موجة كل 6–9 ثواني، جسم منخفض + رغوة ناعمة، والغلاف يتكرر بنفس طول الحلقة
+            const WAVE_PERIODS = [7.2, 8.6, 6.4];
+            const WAVE_T = WAVE_PERIODS.reduce((a, b) => a + b, 0);
+            function wavesFill(d, ch, sr) {
+                const n = d.length, body = fillNoise(new Float32Array(n), 'brown'), foam = fillNoise(new Float32Array(n), 'pink');
+                const amps = [0.95, 0.75, 0.85], shift = ch ? 0.35 : 0;
+                for (let i = 0; i < n; i++) {
+                    let t = (i / sr + shift) % WAVE_T, k = 0;
+                    while (t >= WAVE_PERIODS[k]) { t -= WAVE_PERIODS[k]; k++; }
+                    const p = t / WAVE_PERIODS[k];
+                    const e = (p < 0.35 ? Math.pow(Math.sin(p / 0.35 * Math.PI / 2), 2) : Math.pow(Math.cos((p - 0.35) / 0.65 * Math.PI / 2), 1.5)) * amps[k];
+                    d[i] = body[i] * (0.25 + 0.75 * e) + foam[i] * e * e * 0.55;
+                }
+            }
+            // مقهى: أصوات ناس بعيدة (مقاطع كلام قصيرة بجمل وفواصل) + طقة كوب أو ملعقة كل كم ثانية
+            function cafeFill(d, ch, sr) {
+                const n = d.length, room = fillNoise(new Float32Array(n), 'brown');
+                for (let i = 0; i < n; i++) d[i] = room[i] * 0.08;
+                for (let v = 0; v < 7; v++) {
+                    const g = rand(0.05, 0.13), f0 = rand(95, 230);
+                    let t = Math.floor(rand(0, 2) * sr), phase = 0;
+                    while (t < n) {
+                        const phraseEnd = t + Math.floor(rand(1, 3.2) * sr);
+                        while (t < phraseEnd && t < n) {
+                            const len = Math.floor(rand(0.07, 0.24) * sr), f = f0 * rand(0.85, 1.2), amp = rand(0.5, 1);
+                            for (let i = 0; i < len && t + i < n; i++) {
+                                phase += f / sr; if (phase >= 1) phase -= 1;
+                                let e = Math.sin(Math.PI * i / len); e *= e;
+                                d[t + i] += g * amp * e * ((phase * 2 - 1) * 0.8 + (Math.random() * 2 - 1) * 0.35);
+                            }
+                            t += len + Math.floor(rand(0.02, 0.09) * sr);
+                        }
+                        t += Math.floor(rand(0.25, 1.4) * sr);
+                    }
+                }
+                let t = Math.floor(rand(0.5, 3) * sr);
+                while (t < n) {
+                    const f = rand(1900, 3300), a = rand(0.04, 0.1), dec = rand(0.12, 0.3), len = Math.floor(dec * 5 * sr);
+                    for (let i = 0; i < len && t + i < n; i++) {
+                        const tt = i / sr, e = Math.exp(-tt / dec);
+                        d[t + i] += a * e * (Math.sin(2 * Math.PI * f * tt) + 0.5 * Math.sin(2 * Math.PI * f * 2.76 * tt) * Math.exp(-tt / (dec * 0.4)) + 0.3 * Math.sin(2 * Math.PI * f * 5.4 * tt) * Math.exp(-tt / (dec * 0.25)));
+                    }
+                    t += Math.floor(rand(2.5, 8) * sr);
+                }
+            }
+            // غابة: نسمة خفيفة + ثلاث أنواع طيور (زقزقة، ترِل، صفير) بأوقات عشوائية
+            function birdsFill(d, ch, sr) {
+                const n = d.length, bed = fillNoise(new Float32Array(n), 'pink');
+                for (let i = 0; i < n; i++) d[i] = bed[i] * 0.05;
+                let t = Math.floor(rand(0.2, 1.5) * sr);
+                while (t < n) {
+                    const kind = Math.floor(Math.random() * 3), a = rand(0.04, 0.14);
+                    if (kind === 0) {
+                        const notes = Math.floor(rand(3, 7)), up = Math.random() < 0.5, fA = rand(2600, 3600), fB = fA * rand(1.25, 1.6);
+                        for (let k = 0; k < notes; k++) { const len = Math.floor(rand(0.045, 0.09) * sr); tone(d, t, len, sr, up ? fA : fB, up ? fB : fA, a, 0, 0); t += len + Math.floor(rand(0.05, 0.11) * sr); }
+                    } else if (kind === 1) {
+                        const len = Math.floor(rand(0.4, 0.9) * sr), f = rand(3200, 4400);
+                        tone(d, t, len, sr, f, f * 0.85, a * 0.8, rand(22, 34), 0); t += len;
+                    } else {
+                        const f = rand(1700, 2500);
+                        for (let k = 0; k < 2; k++) { const len = Math.floor(rand(0.18, 0.32) * sr), fk = k ? f * rand(0.8, 1.2) : f; tone(d, t, len, sr, fk, fk, a, 0, 6); t += len + Math.floor(rand(0.08, 0.16) * sr); }
+                    }
+                    t += Math.floor(rand(0.7, 3.8) * sr);
+                }
+            }
+            function thunderBuffer(c) {
+                const sr = c.sampleRate, n = Math.floor(7 * sr), b = c.createBuffer(2, n, sr);
+                for (let ch = 0; ch < 2; ch++) {
+                    const d = fillNoise(b.getChannelData(ch), 'brown');
+                    const hits = [[0, 1], [rand(0.3, 0.9), rand(0.5, 0.9)], [rand(1.2, 2.2), rand(0.3, 0.6)]];
+                    for (let i = 0; i < n; i++) {
+                        const t = i / sr; let e = 0;
+                        for (let h = 0; h < hits.length; h++) { const x = t - hits[h][0]; if (x >= 0) e += hits[h][1] * (1 - Math.exp(-x / 0.08)) * Math.exp(-x / 1.6); }
+                        d[i] *= e * 1.6;
+                    }
+                }
+                return b;
+            }
+            function roomIR(c, secs) {
+                const sr = c.sampleRate, n = Math.floor(secs * sr), b = c.createBuffer(2, n, sr);
+                for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); }
+                return b;
+            }
+
+            // ---------- مكتبة المقاطع (تتولد مرة وحدة عند أول استخدام) ----------
+            const cache = new WeakMap();
+            const MAKERS = {
+                pink: c => loopBuffer(c, 10, d => fillNoise(d, 'pink')),
+                brown: c => loopBuffer(c, 10, d => fillNoise(d, 'brown')),
+                rainDrops: c => loopBuffer(c, 8, (d, ch, sr) => drops(d, sr, 55, 0.35, 1800, 6500)),
+                stormDrops: c => loopBuffer(c, 8, (d, ch, sr) => drops(d, sr, 90, 0.4, 1500, 6000)),
+                crackle: c => loopBuffer(c, 9, (d, ch, sr) => crackles(d, sr, 9)),
+                waves: c => loopBuffer(c, WAVE_T, wavesFill),
+                cafe: c => loopBuffer(c, 16, cafeFill),
+                birds: c => loopBuffer(c, 24, birdsFill),
+                thunder: c => thunderBuffer(c),
+                room: c => roomIR(c, 1.3)
+            };
+            function B(c, key) { let m = cache.get(c); if (!m) { m = {}; cache.set(c, m); } return m[key] || (m[key] = MAKERS[key](c)); }
+            function loopSrc(c, b, dest) { const s = c.createBufferSource(); s.buffer = b; s.loop = true; s.connect(dest); s.start(c.currentTime, Math.random() * b.duration); return s; }
+            function F(c, type, freq, q, g) { const f = c.createBiquadFilter(); f.type = type; f.frequency.value = freq; if (q != null) f.Q.value = q; if (g != null) f.gain.value = g; return f; }
+            function G(c, v) { const g = c.createGain(); g.gain.value = v; return g; }
+            function path(out, ...nodes) { for (let i = 0; i < nodes.length - 1; i++) nodes[i].connect(nodes[i + 1]); nodes[nodes.length - 1].connect(out); return nodes[0]; }
+            function lfo(c, freq, depth, param) { const o = c.createOscillator(); o.frequency.value = freq; const g = G(c, depth); o.connect(g); g.connect(param); o.start(); return o; }
+            function stopper(nodes, extra) { return () => { if (extra) extra(); nodes.forEach(n => { try { n.stop(); } catch (e) {} }); }; }
+
+            // كل وصفة تبني الصوت وتوصله لـ out وترجع دالة الإيقاف
+            const RECIPES = {
+                rain(c, out) {
+                    return stopper([
+                        loopSrc(c, B(c, 'pink'), path(out, F(c, 'highpass', 450), F(c, 'lowpass', 7000), G(c, 0.65))),
+                        loopSrc(c, B(c, 'rainDrops'), path(out, F(c, 'highpass', 1200), G(c, 0.55)))
+                    ]);
+                },
+                storm(c, out) {
+                    const nodes = [
+                        loopSrc(c, B(c, 'pink'), path(out, F(c, 'highpass', 300), F(c, 'lowpass', 5500), G(c, 0.7))),
+                        loopSrc(c, B(c, 'stormDrops'), path(out, F(c, 'highpass', 900), G(c, 0.5)))
+                    ];
+                    const bus = path(out, F(c, 'lowpass', 260), G(c, 1.1));
+                    let timer = null, alive = true;
+                    const boom = () => {
+                        if (!alive) return;
+                        const s = c.createBufferSource(); s.buffer = B(c, 'thunder'); s.playbackRate.value = rand(0.7, 1.15);
+                        s.connect(path(bus, G(c, rand(0.5, 1)))); s.start(c.currentTime + 0.05);
+                        timer = setTimeout(boom, rand(14, 38) * 1000);
+                    };
+                    timer = setTimeout(boom, rand(3, 9) * 1000);
+                    return stopper(nodes, () => { alive = false; clearTimeout(timer); });
+                },
+                waves(c, out) {
+                    return stopper([loopSrc(c, B(c, 'waves'), path(out, F(c, 'highpass', 35), F(c, 'lowpass', 2200), G(c, 0.9)))]);
+                },
+                wind(c, out) {
+                    const bp = F(c, 'bandpass', 500, 0.9), swell = G(c, 0.6);
+                    const nodes = [loopSrc(c, B(c, 'pink'), path(out, bp, swell, G(c, 2.2)))];
+                    nodes.push(lfo(c, 0.05, 280, bp.frequency), lfo(c, 0.13, 120, bp.frequency), lfo(c, 0.08, 0.35, swell.gain));
+                    return stopper(nodes);
+                },
+                fire(c, out) {
+                    return stopper([
+                        loopSrc(c, B(c, 'brown'), path(out, F(c, 'lowpass', 500), G(c, 0.6))),
+                        loopSrc(c, B(c, 'crackle'), path(out, F(c, 'highpass', 700), G(c, 0.6))),
+                        loopSrc(c, B(c, 'pink'), path(out, F(c, 'bandpass', 2500, 0.7), G(c, 0.05)))
+                    ]);
+                },
+                cafe(c, out) {
+                    const conv = c.createConvolver(); conv.buffer = B(c, 'room');
+                    const tone = path(out, G(c, 1.7));
+                    const pre = F(c, 'lowpass', 3400);
+                    pre.connect(tone); pre.connect(conv); conv.connect(path(out, G(c, 1.2)));
+                    return stopper([loopSrc(c, B(c, 'cafe'), path(pre, F(c, 'highpass', 170), F(c, 'peaking', 900, 1, 3)))]);
+                },
+                forest(c, out) {
+                    return stopper([
+                        loopSrc(c, B(c, 'birds'), path(out, F(c, 'highpass', 300), G(c, 1.8))),
+                        loopSrc(c, B(c, 'pink'), path(out, F(c, 'lowpass', 700), G(c, 0.25)))
+                    ]);
+                },
+                brown(c, out) {
+                    return stopper([loopSrc(c, B(c, 'brown'), path(out, F(c, 'lowpass', 900), G(c, 0.55)))]);
+                }
+            };
+
+            // ---------- التشغيل والمزج ----------
+            function ensure() {
+                if (!ctx) {
+                    ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -10; comp.ratio.value = 4;
+                    master = ctx.createGain(); master.gain.value = st.master * st.master;
+                    master.connect(comp); comp.connect(ctx.destination);
+                }
+                if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+                return ctx;
+            }
+            function start(id) {
+                if (active[id]) return;
+                ensure();
+                const out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+                let stop;
+                try { stop = RECIPES[id](ctx, out); } catch (e) { out.disconnect(); return; }
+                const v = volOf(id); out.gain.setTargetAtTime(v * v, ctx.currentTime, 0.4);
+                active[id] = { out, stop };
+            }
+            function stopOne(id, now) {
+                const a = active[id]; if (!a) return; delete active[id];
+                const t = ctx.currentTime; a.out.gain.cancelScheduledValues(t); a.out.gain.setTargetAtTime(0, t, now ? 0.01 : 0.25);
+                setTimeout(() => { try { a.stop(); } catch (e) {} try { a.out.disconnect(); } catch (e) {} }, now ? 60 : 1300);
+            }
+            function play() { if (!st.sel.length) return; ensure(); st.sel.forEach(start); playing = true; render(); }
+            function pause() { if (ctx && ctx.state === 'running') ctx.suspend().catch(() => {}); playing = false; render(); }
+            function togglePlay() { if (playing) pause(); else if (!st.sel.length) toggleSound('rain'); else play(); }
+            function toggleSound(id) {
+                const i = st.sel.indexOf(id);
+                if (i >= 0) { st.sel.splice(i, 1); if (ctx) stopOne(id, !playing); if (!st.sel.length) pause(); }
+                else { st.sel.push(id); ensure(); start(id); playing = true; }
+                save(); render();
+            }
+            function setVol(id, v) { st.vol[id] = v; save(); const a = active[id]; if (a) a.out.gain.setTargetAtTime(v * v, ctx.currentTime, 0.08); }
+            function setMaster(v) { st.master = v; save(); if (master) master.gain.setTargetAtTime(v * v, ctx.currentTime, 0.08); }
+            function stopAll() { st.sel.slice().forEach(id => { if (ctx) stopOne(id, true); }); st.sel = []; save(); pause(); }
+            // ربط بالعداد: تشتغل مع التركيز وتسكت بالاستراحة والإيقاف (إذا الخيار مفعّل)
+            function onTimer(state) { if (!st.link || !st.sel.length) return; if (state === 'focus') play(); else if (playing) pause(); }
+
+            // ---------- الواجهة ----------
+            function render() {
+                document.querySelectorAll('#ambientGrid .amb-tile').forEach(tile => {
+                    const id = tile.dataset.id, on = st.sel.indexOf(id) >= 0;
+                    tile.classList.toggle('on', on);
+                    tile.querySelector('.amb-toggle').setAttribute('aria-pressed', on ? 'true' : 'false');
+                });
+                const pb = document.getElementById('ambientPlayBtn');
+                if (pb) { pb.innerHTML = playing ? '<i class="fas fa-pause" aria-hidden="true"></i><span>إيقاف مؤقت</span>' : '<i class="fas fa-play" aria-hidden="true"></i><span>تشغيل</span>'; }
+                const names = st.sel.map(id => info(id).name);
+                const now = document.getElementById('ambientNow');
+                if (now) now.textContent = !names.length ? 'مطفأة' : (playing ? names.join('، ') : 'متوقفة · ' + names.join('، '));
+                const ob = document.getElementById('ambientOpenBtn');
+                if (ob) ob.classList.toggle('playing', playing && names.length > 0);
+            }
+            function init() {
+                const grid = document.getElementById('ambientGrid');
+                if (!grid) return;
+                grid.innerHTML = SOUNDS.map(s => `<div class="amb-tile" data-id="${s.id}"><button type="button" class="amb-toggle" aria-pressed="false"><i class="fas ${s.icon}" aria-hidden="true"></i><span>${s.name}</span></button><input type="range" class="amb-vol" min="0" max="100" value="${Math.round(volOf(s.id) * 100)}" aria-label="مستوى صوت ${s.name}"></div>`).join('');
+                grid.querySelectorAll('.amb-tile').forEach(tile => {
+                    const id = tile.dataset.id;
+                    tile.querySelector('.amb-toggle').addEventListener('click', () => toggleSound(id));
+                    tile.querySelector('.amb-vol').addEventListener('input', e => setVol(id, Number(e.target.value) / 100));
+                });
+                const m = document.getElementById('ambientMaster');
+                m.value = Math.round(st.master * 100);
+                m.addEventListener('input', e => setMaster(Number(e.target.value) / 100));
+                const l = document.getElementById('ambientLink');
+                l.checked = !!st.link;
+                l.addEventListener('change', e => { st.link = e.target.checked; save(); });
+                render();
+            }
+            return { init, togglePlay, toggleSound, stopAll, onTimer, _recipe: (c, id, out) => RECIPES[id](c, out), _ids: SOUNDS.map(s => s.id) };
+        })();
+        Ambient.init();
+
+        function openAmbientModal() { document.getElementById('ambientModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
+        function closeAmbientModal() { document.getElementById('ambientModal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
 
         // إشعارات النظام: دعم احتياطي لتنبيه انتهاء الجلسة حتى لو كان المتصفح بالخلفية لفترة قصيرة.
         // ملاحظة مهمة: نظام iOS يوقف تشغيل الجافاسكربت تماماً عند قفل الشاشة أو تبديل التطبيق لفترة طويلة،
@@ -822,7 +1243,7 @@
         function closeChangePassModal() { document.getElementById('changePassModal').style.display = 'none'; if (document.getElementById('leaderboardModal').style.display !== 'block') document.getElementById('overlay').style.display = 'none'; }
 
         function closeAllModals() {
-            ['authModal', 'changePassModal', 'leaderboardModal', 'surrenderConfirmModal', 'evaluationModal', 'customTimerModal'].forEach(id => document.getElementById(id).style.display = 'none');
+            ['authModal', 'changePassModal', 'leaderboardModal', 'surrenderConfirmModal', 'evaluationModal', 'customTimerModal', 'ambientModal'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('overlay').style.display = 'none';
             if (firebaseReady && leaderboardListener) db.ref(`leaderboard_weeks/${getWeekKey()}`).off('value', leaderboardListener);
             document.getElementById('sidebar').classList.remove('active');
@@ -995,11 +1416,34 @@
         }
         function closeLeaderboard() { document.getElementById('leaderboardModal').style.display = 'none'; if (document.getElementById('authModal').style.display !== 'block') document.getElementById('overlay').style.display = 'none'; if (firebaseReady && leaderboardListener) db.ref(`leaderboard_weeks/${getWeekKey()}`).off('value', leaderboardListener); }
 
+        // ===== الوضع الصباحي والليلي =====
+        let flakeColor = 'rgba(255,255,255,0.3)';
+        function currentTheme() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+        function applyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', t === 'light' ? '#f6f2ea' : '#050505');
+            const btn = document.getElementById('themeToggle');
+            if (btn) {
+                btn.setAttribute('aria-label', t === 'light' ? 'التبديل للوضع الليلي' : 'التبديل للوضع الصباحي');
+                btn.title = t === 'light' ? 'الوضع الليلي' : 'الوضع الصباحي';
+            }
+            flakeColor = t === 'light' ? 'rgba(154,112,40,0.35)' : 'rgba(255,255,255,0.3)';
+        }
+        function toggleTheme() {
+            const t = currentTheme() === 'light' ? 'dark' : 'light';
+            try { localStorage.setItem('kh_theme', t); } catch (e) {}
+            applyTheme(t);
+        }
+        applyTheme(currentTheme());
+
         const canvas = document.getElementById('snowCanvas'); const ctx = canvas.getContext('2d'); let w, h, flakes = [];
         function res() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; } window.onresize = res; res();
-        class Flake { constructor() { this.reset(); } reset() { this.x = Math.random()*w; this.y = Math.random()*h; this.s = Math.random()*0.5+0.2; this.r = Math.random()*2+1; } update() { this.y += this.s; if(this.y > h) this.y = -10; } draw() { ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill(); } }
+        class Flake { constructor() { this.reset(); } reset() { this.x = Math.random()*w; this.y = Math.random()*h; this.s = Math.random()*0.5+0.2; this.r = Math.random()*2+1; } update() { this.y += this.s; if(this.y > h) this.y = -10; } draw() { ctx.fillStyle = flakeColor; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill(); } }
         for(let i=0; i<70; i++) flakes.push(new Flake());
-        function anim() { ctx.clearRect(0,0,w,h); flakes.forEach(f=>{f.update(); f.draw();}); requestAnimationFrame(anim); } anim();
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        function anim() { ctx.clearRect(0,0,w,h); flakes.forEach(f=>{f.update(); f.draw();}); requestAnimationFrame(anim); }
+        if (!reduceMotion) anim();
 
         function formatDateKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
         
@@ -1026,9 +1470,12 @@
         function renderHistory() {
             const historyList = document.getElementById('historyList'); const entries = Object.entries(studyData.days || {}).sort((a, b) => new Date(b[0]) - new Date(a[0]));
             if (!entries.length) { historyList.innerHTML = '<li class="history-item"><span>ماكو ساعات مسجلة هذا الأسبوع</span><span>0.0 س</span></li>'; return; }
-            historyList.innerHTML = entries.map(([dateKey, seconds]) => `<li class="history-item"><div><strong>${new Date(dateKey).toLocaleDateString('ar-IQ', {weekday: 'long', month: 'short', day: 'numeric'})}</strong><small>سجل اليوم</small></div><span>${formatHoursLabel(seconds)}</span></li>`).join('');
+            historyList.innerHTML = entries.map(([dateKey, seconds]) => `<li class="history-item"><div><strong>${new Date(dateKey + 'T00:00:00').toLocaleDateString('ar-IQ', {weekday: 'long', month: 'short', day: 'numeric'})}</strong><small>سجل اليوم</small></div><span>${formatHoursLabel(seconds)}</span></li>`).join('');
         }
-        function resetToday() { studyData.days[formatDateKey()] = 0; saveDataLocal(); syncToFirebase(); }
+        function resetToday() {
+            if (!confirm('متأكد تريد تصفير ساعات دراسة اليوم؟ ما تقدر ترجعها بعدين.')) return;
+            studyData.days[formatDateKey()] = 0; saveDataLocal(); syncToFirebase();
+        }
         
         function saveDataLocal() { ensureWeeklyReset(); localStorage.setItem('khulasa_study_data', JSON.stringify(studyData)); updateDisplay(); }
 
@@ -1104,6 +1551,7 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
             requestNotifyPermission();
             isRunning = true; isPaused = false;
+            Ambient.onTimer(isBreak ? 'break' : 'focus');
             requestScreenWakeLock(); 
             
             if (!isRestoring) { shownMilestones = new Set(); resetSessionQuotes(); endTime = Date.now() + (timeLeft * 1000); }
@@ -1133,7 +1581,7 @@
 
         function setMode(work, rest, id) {
             timerWorker.postMessage('stop'); isRunning = false; isPaused = false; isBreak = false;
-            releaseScreenWakeLock();
+            releaseScreenWakeLock(); Ambient.onTimer('stop');
             shownMilestones = new Set(); resetSessionQuotes(); timeLeft = work * 60; currentSessionTotal = timeLeft; localStorage.removeItem('kh_timer_state');
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active');
             document.getElementById('mainBtn').style.display = "block"; document.getElementById('secControls').style.display = "none";
@@ -1142,7 +1590,8 @@
 
         function togglePause() { 
             isPaused = !isPaused; 
-            document.getElementById('pauseBtn').innerText = isPaused ? "استئناف" : "إيقاف مؤقت"; 
+            document.getElementById('pauseBtn').innerText = isPaused ? "استئناف" : "إيقاف مؤقت";
+            Ambient.onTimer(isPaused ? 'pause' : (isBreak ? 'break' : 'focus'));
             if (isPaused) {
                 if (unsyncedSeconds > 0) { syncToFirebase(); unsyncedSeconds = 0; }
                 releaseScreenWakeLock();
@@ -1185,18 +1634,18 @@
             closeSurrenderConfirm();
             if (unsyncedSeconds > 0) { syncToFirebase(); unsyncedSeconds = 0; }
             timerWorker.postMessage('stop'); isRunning = false; isPaused = false; isBreak = false;
-            releaseScreenWakeLock();
+            releaseScreenWakeLock(); Ambient.onTimer('stop');
             shownMilestones = new Set(); resetSessionQuotes(); localStorage.removeItem('kh_timer_state');
 
             const today = formatDateKey(); const studiedToday = studyData.days[today] || 0; const targetGoalSeconds = Number(studyData.dailyGoal) * 3600;
             let percent = targetGoalSeconds ? (studiedToday / targetGoalSeconds) * 100 : 0; if (percent > 100) percent = 100;
 
             let evalMsg = ""; let evalColor = "";
-            if (percent < 20) { evalMsg = "بداية متعثرة، تحتاج تركيز أكبر الجلسة القادمة 🚶‍♂️"; evalColor = "#e74c3c"; } 
-            else if (percent < 40) { evalMsg = "جهد مقبول، لكن المشوار طويل 🏃‍♂️"; evalColor = "#e67e22"; } 
-            else if (percent < 60) { evalMsg = "نصف الطريق! أداء جيد استمر 🔥"; evalColor = "#f1c40f"; } 
-            else if (percent < 85) { evalMsg = "بطل! إنجاز رائع وقريب من الهدف 🌟"; evalColor = "#2ecc71"; } 
-            else if (percent < 100) { evalMsg = "أسطورة! قاب قوسين أو أدنى من التقفيل 👑"; evalColor = "#3498db"; } 
+            if (percent < 20) { evalMsg = "بداية متعثرة، تحتاج تركيز أكبر الجلسة القادمة 🚶‍♂️"; evalColor = "var(--eval-1)"; } 
+            else if (percent < 40) { evalMsg = "جهد مقبول، لكن المشوار طويل 🏃‍♂️"; evalColor = "var(--eval-2)"; } 
+            else if (percent < 60) { evalMsg = "نصف الطريق! أداء جيد استمر 🔥"; evalColor = "var(--eval-3)"; } 
+            else if (percent < 85) { evalMsg = "بطل! إنجاز رائع وقريب من الهدف 🌟"; evalColor = "var(--eval-4)"; } 
+            else if (percent < 100) { evalMsg = "أسطورة! قاب قوسين أو أدنى من التقفيل 👑"; evalColor = "var(--eval-5)"; } 
             else { evalMsg = "وحش السادس! حققت الهدف بالكامل 🏆"; evalColor = "var(--gold)"; } 
 
             document.getElementById('evaluationModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
