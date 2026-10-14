@@ -12,10 +12,12 @@
         })();
     </script>
     
+    <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <title>Study with خلاصة</title>
     <meta name="theme-color" content="#050505">
@@ -429,7 +431,7 @@
             <p class="helper-text">سجّل دخولك لحسابك الموجود لحفظ تقدمك وترتيبك.</p>
             <input id="loginNameInput" class="modal-input" type="text" maxlength="18" placeholder="اسمك">
             <div class="password-field">
-                <input id="loginPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور">
+                <input id="loginPassInput" class="modal-input" type="password" maxlength="64" autocomplete="current-password" placeholder="كلمة المرور">
                 <button type="button" class="toggle-pass" onclick="togglePassVisibility('loginPassInput', this)">👁️</button>
             </div>
             <div class="helper-text error-text" id="loginError"></div>
@@ -443,11 +445,11 @@
             <p class="helper-text">اختر اسماً ورمزاً سرياً خاصاً بك حتى محد يأخذ نقاطك.</p>
             <input id="signupNameInput" class="modal-input" type="text" maxlength="18" placeholder="اسمك (3 أحرف فأكثر)">
             <div class="password-field">
-                <input id="signupPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة مرور (4 رموز فأكثر)">
+                <input id="signupPassInput" class="modal-input" type="password" maxlength="64" autocomplete="new-password" placeholder="كلمة مرور (6 رموز فأكثر)">
                 <button type="button" class="toggle-pass" onclick="togglePassVisibility('signupPassInput', this)">👁️</button>
             </div>
             <div class="password-field">
-                <input id="signupConfirmInput" class="modal-input" type="password" maxlength="20" placeholder="تأكيد كلمة المرور">
+                <input id="signupConfirmInput" class="modal-input" type="password" maxlength="64" autocomplete="new-password" placeholder="تأكيد كلمة المرور">
                 <button type="button" class="toggle-pass" onclick="togglePassVisibility('signupConfirmInput', this)">👁️</button>
             </div>
             <div class="helper-text error-text" id="signupError"></div>
@@ -462,15 +464,15 @@
         <h3 class="modal-title">تغيير كلمة المرور 🔑</h3>
         <p class="helper-text">أدخل كلمة مرورك الحالية، ثم كلمة المرور الجديدة.</p>
         <div class="password-field">
-            <input id="currentPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور الحالية">
+            <input id="currentPassInput" class="modal-input" type="password" maxlength="64" autocomplete="current-password" placeholder="كلمة المرور الحالية">
             <button type="button" class="toggle-pass" onclick="togglePassVisibility('currentPassInput', this)">👁️</button>
         </div>
         <div class="password-field">
-            <input id="newPassInput" class="modal-input" type="password" maxlength="20" placeholder="كلمة المرور الجديدة (4 رموز فأكثر)">
+            <input id="newPassInput" class="modal-input" type="password" maxlength="64" autocomplete="new-password" placeholder="كلمة المرور الجديدة (6 رموز فأكثر)">
             <button type="button" class="toggle-pass" onclick="togglePassVisibility('newPassInput', this)">👁️</button>
         </div>
         <div class="password-field">
-            <input id="newPassConfirmInput" class="modal-input" type="password" maxlength="20" placeholder="تأكيد كلمة المرور الجديدة">
+            <input id="newPassConfirmInput" class="modal-input" type="password" maxlength="64" autocomplete="new-password" placeholder="تأكيد كلمة المرور الجديدة">
             <button type="button" class="toggle-pass" onclick="togglePassVisibility('newPassConfirmInput', this)">👁️</button>
         </div>
         <div class="helper-text error-text" id="changePassError"></div>
@@ -547,15 +549,17 @@
         
 
         <div class="extra-links">
-            <a href="https://t.me/tlv_12" target="_blank" class="extra-btn">خلاصة السادس</a>
+            <a href="https://t.me/tlv_12" target="_blank" rel="noopener noreferrer" class="extra-btn">خلاصة السادس</a>
             
         </div>
     </div>
 
-    <a href="https://t.me/Not_Wdh" target="_blank" class="creator-signature">Created By: @Not_Wdh</a>
+    <a href="https://t.me/Not_Wdh" target="_blank" rel="noopener noreferrer" class="creator-signature">Created By: @Not_Wdh</a>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <!-- مكتبات Firebase بنسخة ثابتة مع بصمة (SRI): إذا تغيّر الملف على الـ CDN المتصفح يرفض تشغيله -->
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.6.1/firebase-app-compat.js" integrity="sha384-+KqYOH8TSu3FKjN3ld86eZMYqq6lk+y2GjV1hyOW+1hT3Pk/aD8JFueZP1W3bPh1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.6.1/firebase-auth-compat.js" integrity="sha384-+OubPIxtsLCp2uUuSsvWDuBB9oSIEDIYt2qQfYki+vDmSxc6GQsBbBPH6Z6x5wrq" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.6.1/firebase-database-compat.js" integrity="sha384-wgWsmYYQHit2pRy7gDddz6mH+S1x+rzuEL8DgPIg7lyJjm7pw3v6woxnm/0ULf9p" crossorigin="anonymous"></script>
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1048,21 +1052,27 @@
         fetchLiveQuotes();
 
 
-        // ضع بيانات مشروع Firebase الحقيقية الخاصة بك هنا (من إعدادات المشروع في Firebase Console)
+        // إعدادات مشروع Firebase (w-57b20). هذي القيم عامة بطبيعتها وتظهر لأي زائر؛
+        // الحماية الفعلية من قواعد قاعدة البيانات (database.rules.json) ومن Firebase Auth.
         const firebaseConfig = {
-            apiKey: "AIzaSy...", 
-            databaseURL: "https://w-57b20-default-rtdb.firebaseio.com/",
+            apiKey: "AIzaSyC3ki8Qtimt8i7YjuSqz08ZAapc2ANLfcA",
+            authDomain: "w-57b20.firebaseapp.com",
+            databaseURL: "https://w-57b20-default-rtdb.firebaseio.com",
             projectId: "w-57b20",
-            appId: "1:..." 
+            storageBucket: "w-57b20.firebasestorage.app",
+            messagingSenderId: "220686404844",
+            appId: "1:220686404844:web:37d6ae55e0ba471e5e69c9"
         };
 
         // تشغيل آمن: إذا تعذر الاتصال بـ Firebase (مفاتيح غير صحيحة أو لا يوجد إنترنت)
         // يبقى المؤقت ودراستك المحلية تعملان بشكل طبيعي، وتتعطل فقط ميزات لوحة المتصدرين وتسجيل الدخول.
         let db = null;
+        let auth = null;
         let firebaseReady = false;
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
+            auth = firebase.auth();
             firebaseReady = true;
         } catch (err) {
             console.warn('تعذر تهيئة Firebase، التطبيق يعمل الآن بدون ميزات الاتصال:', err);
@@ -1073,12 +1083,6 @@
             if (containerEl) containerEl.innerHTML = 'تعذر الاتصال بخدمة لوحة المتصدرين الآن. تأكد من الإنترنت وحاول مرة أخرى — مؤقتك ودراستك المحلية يستمران بشكل طبيعي.';
         }
 
-        // تجزئة كلمة المرور بـ SHA-256 قبل تخزينها، بدل حفظها كنص واضح
-        async function hashPassword(pw) {
-            const data = new TextEncoder().encode(pw);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
 
         // دالة لمنع حقن أكواد HTML/JS لتخريب لوحة المتصدرين
         function escapeHTML(str) {
@@ -1099,36 +1103,64 @@
         let wakeLock = null; // للحفاظ على الشاشة تعمل
 
         // السماح فقط بالحروف العربية، الإنجليزية، الأرقام والمسافات
-        function normalizeUserName(name) { 
+        // الحروف المسموحة بالاسم: إنكليزي، أرقام، حروف عربية أساسية، وحروف كوردية. بدون تشكيل أو تطويل أو رموز مخفية،
+        // حتى محد يقدر يسوي اسم يشبه اسم غيره بالشكل. نفس القائمة موجودة بقواعد قاعدة البيانات (database.rules.json).
+        const NAME_CHARS = 'a-zA-Z0-9ء-غف-يپچژگڤڕڵۆێەیکھ';
+        const NAME_DISALLOWED_RE = new RegExp('[^' + NAME_CHARS + '\\s]', 'g');
+        // إذا الاسم بيه شي غير هذا (إيموجي، رموز...) نرفضه بالتسجيل بدل ما نغيّره بصمت
+        const NAME_TYPABLE_RE = new RegExp('[^' + NAME_CHARS + '\\s\\u0640\\u064B-\\u065F\\u0670\\u0660-\\u0669\\u06F0-\\u06F9]');
+
+        function stripNameMarks(name) {
             return (name || '')
-                .replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '') // إزالة أي رموز غريبة أو إيموجي
-                .replace(/\s+/g, ' ') 
-                .trim()
-                .substring(0, 18); 
+                .normalize('NFD').replace(/[̀-ͯ]/g, '').normalize('NFC') // José → Jose، Şêrko → Serko، والهمزة المنفصلة ترجع حرف واحد
+                .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660)) // ٠١٢ → 012
+                .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0)); // ۰۱۲ → 012
         }
 
-        function getUserKey(name) { return normalizeUserName(name).toLowerCase().replace(/\s+/g, '_'); }
+        function normalizeUserName(name) { 
+            return stripNameMarks(name)
+                .replace(NAME_DISALLOWED_RE, '') // يشيل التشكيل والتطويل وأي رمز غريب أو إيموجي أو رمز اتجاه مخفي
+                .replace(/\s+/g, ' ') 
+                .trim()
+                .substring(0, 18)
+                .trim(); 
+        }
+
+        function hasUnsupportedNameChars(name) { return NAME_TYPABLE_RE.test(stripNameMarks(name)); }
+
+        // المفتاح يوحّد الحروف اللي تشبه بعضها، فـ"أحمد" و"احمد" و"فاطمة" و"فاطمه" و"Ali" و"AIi" يصيرون نفس الحساب.
+        // نفس التحويلات بنفس الترتيب موجودة بقواعد قاعدة البيانات.
+        const KEY_FOLDS = [['أ', 'ا'], ['إ', 'ا'], ['آ', 'ا'], ['ى', 'ي'], ['ی', 'ي'], ['ک', 'ك'], ['ة', 'ه'], ['ە', 'ه'], ['ھ', 'ه'], ['l', 'i'], ['1', 'i'], ['0', 'o'], [' ', '_']];
+        function getUserKey(name) {
+            let key = normalizeUserName(name).toLowerCase();
+            KEY_FOLDS.forEach(([from, to]) => { key = key.split(from).join(to); });
+            return key;
+        }
 
         // === فلتر الكلمات المسيئة لمنع استخدامها كاسم حساب ===
-        // قائمة أساسية تغطي أكثر الكلمات الشائعة (عربي + إنجليزي). تقدر تضيف أي كلمة جديدة بسهولة بسطر واحد بالمصفوفة.
+        // الكلمات القصيرة تنفحص ككلمة كاملة بس، حتى أسماء حقيقية مثل "خولة" و"الزبيدي" و"هاني كاظم" و"Dickson" ما تنرفض.
+        // الكلمات الطويلة تنفحص بكل مكان، حتى لو انكتبت مقطعة بمسافات.
+        const BANNED_WHOLE_WORDS = ['كس', 'نيك', 'نياك', 'زبي', 'عرص', 'خول', 'طيز', 'لوطي', 'dick', 'cock', 'cunt', 'rape', 'slut'];
         const BANNED_NAME_FRAGMENTS = [
-            'كس', 'نيك', 'نياك', 'متناك', 'منيوك', 'زبي', 'شرموط', 'شرمط', 'عرص', 'خول', 'قحبه', 'قحبة', 'لوطي', 'كسمك', 'طيز',
-            'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'cunt', 'whore', 'slut', 'nigger', 'nigga', 'faggot', 'retard', 'rape', 'porn', 'pussy', 'dick', 'cock'
+            'متناك', 'منيوك', 'شرموط', 'شرمط', 'قحبه', 'قحبة', 'كسمك', 'كسختك', 'نيكني',
+            'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'whore', 'nigger', 'nigga', 'faggot', 'retard', 'porn', 'pussy'
         ];
         // تطبيع النص للمقارنة فقط: يوحّد حروف عربية متشابهة، يحوّل أرقام الـ"ليتسبيك" الشائعة لحروفها،
-        // يشيل المسافات والرموز، ويقلّل تكرار الحرف (مثل "فــــــك" أو "fuuuuck") لمنع الالتفاف على الفلتر.
+        // يشيل الرموز، ويقلّل تكرار الحرف (مثل "فــــــك" أو "fuuuuck") لمنع الالتفاف على الفلتر.
         function normalizeForBadWordCheck(str) {
             return (str || '')
                 .toLowerCase()
-                .replace(/[\u064B-\u065F\u0670]/g, '')
+                .replace(/[ً-ٰٟ]/g, '')
                 .replace(/[إأآا]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
                 .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't').replace(/\$/g, 's').replace(/@/g, 'a')
-                .replace(/[^a-z\u0600-\u06FF]/g, '')
+                .replace(/[^a-z؀-ۿ]/g, '')
                 .replace(/(.)\1+/g, '$1');
         }
         function containsBannedWord(name) {
-            const normalized = normalizeForBadWordCheck(name);
-            return BANNED_NAME_FRAGMENTS.some(w => normalized.includes(normalizeForBadWordCheck(w)));
+            const words = String(name || '').split(/\s+/).map(normalizeForBadWordCheck).filter(Boolean);
+            const joined = words.join('');
+            return words.some(w => BANNED_WHOLE_WORDS.some(b => w === normalizeForBadWordCheck(b)))
+                || BANNED_NAME_FRAGMENTS.some(b => joined.includes(normalizeForBadWordCheck(b)));
         }
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
@@ -1211,7 +1243,7 @@
             if (!fromLeaderboard) closeLeaderboard();
             document.getElementById('authModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
             switchAuthTab(tab);
-            document.getElementById('loginNameInput').value = uName || ''; document.getElementById('loginPassInput').value = '';
+            document.getElementById('loginNameInput').value = uName || localStorage.getItem('kh_name') || ''; document.getElementById('loginPassInput').value = '';
             document.getElementById('signupNameInput').value = ''; document.getElementById('signupPassInput').value = ''; document.getElementById('signupConfirmInput').value = '';
             document.getElementById('loginError').innerText = ''; document.getElementById('signupError').innerText = '';
         }
@@ -1249,8 +1281,77 @@
             document.getElementById('sidebar').classList.remove('active');
         }
 
+        // ===== الحسابات (Firebase Authentication) =====
+        // كلمة المرور ما تنحفظ بقاعدة البيانات أبداً: Firebase Auth يتحقق منها على خوادمه ويحدّ من المحاولات المتكررة.
+        // كل اسم بالمسار usernames/<key> مربوط بحساب Auth واحد (uid)، وقواعد قاعدة البيانات (database.rules.json)
+        // تمنع أي أحد يكتب على نقاط غيره أو يقرا بيانات غيره.
+        // الحسابات القديمة (نظام SHA-256) ما تنتقل: بصماتها كانت مكشوفة للكل، فما تثبت ملكية الاسم. كل طالب يسوي حساب جديد مرة وحدة.
+        const AUTH_EMAIL_DOMAIN = 'users.study-with-one.vercel.app';
+        const MIN_PASSWORD_LENGTH = 6;
+        let authBusy = false; // يمنع تشغيل عمليتين دخول/إنشاء بنفس الوقت (مثلاً ضغط Enter مرتين)
+
+        // بريد عشوائي داخلي لكل حساب (ما ينرسل له شي). عشوائي حتى محد يقدر يحجز بريد حساب غيره مسبقاً.
+        function randomAuthEmail() {
+            const bytes = crypto.getRandomValues(new Uint8Array(12));
+            return 'u' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('') + '@' + AUTH_EMAIL_DOMAIN;
+        }
+
+        function authErrorMessage(err, fallback) {
+            const code = (err && err.code) || '';
+            if (code === 'auth/too-many-requests') return 'محاولات كثيرة، انتظر شوية وحاول مرة ثانية.';
+            if (code === 'auth/network-request-failed') return 'خطأ بالاتصال، تأكد من الإنترنت.';
+            if (code === 'auth/operation-not-allowed' || code === 'auth/invalid-api-key' || code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') return 'خدمة الحسابات غير مفعّلة حالياً، حاول لاحقاً.';
+            return fallback;
+        }
+
+        function isPermissionDenied(err) { return !!err && (err.code === 'PERMISSION_DENIED' || /permission.denied/i.test(String(err.message || ''))); }
+
+        function clearLocalSession() {
+            uName = null; uNameKey = null; myPresenceRef = null;
+            localStorage.removeItem('kh_name_key'); // نخلي kh_name فقط حتى نعبّي حقل الاسم بالمرة الجاية
+        }
+
+        // نشيل "يدرس الآن" للحساب الحالي قبل تبديل الحساب، لأن بعد التبديل القواعد ما تسمح نكتب عليه
+        async function releasePresence() {
+            if (myPresenceRef && auth && auth.currentUser) { try { await myPresenceRef.remove(); } catch (e) {} }
+        }
+
+        // ينشئ حساب Auth جديد ويحجز الاسم له بنسخة Firebase جانبية، حتى إذا فشل الإنشاء يبقى الحساب الحالي مسجل دخول.
+        // إذا الاسم انحجز بنفس اللحظة، نمسح حساب Auth الجديد حتى ما يبقى حساب يتيم. بعد النجاح نسجل دخول بالحساب الجديد.
+        async function claimUsername(cleanedName, key, password) {
+            const signupApp = firebase.initializeApp(firebaseConfig, 'signup-' + Date.now());
+            try {
+                const sAuth = signupApp.auth(); const sDb = signupApp.database();
+                await sAuth.setPersistence(firebase.auth.Auth.Persistence.NONE);
+                const cred = await sAuth.createUserWithEmailAndPassword(randomAuthEmail(), password);
+                try {
+                    await sDb.ref('usernames/' + key).set({ uid: cred.user.uid, email: cred.user.email, name: cleanedName });
+                } catch (err) {
+                    await cred.user.delete().catch(() => {});
+                    throw err;
+                }
+                await releasePresence();
+                await auth.signInWithEmailAndPassword(cred.user.email, password);
+            } finally {
+                signupApp.delete().catch(() => {});
+            }
+        }
+
+        // بيانات الدراسة بالجهاز تخص آخر حساب سجل دخول عليه. إذا جهاز مشترك وانبدل الحساب، ما ننقل ساعات حساب لحساب ثاني.
+        // أول دخول على الجهاز (أو أول حساب بعد التحديث) يدمج ساعات الجهاز ويا الحساب، حتى وقت الطالب ما يضيع.
+        function mergeCloudStudyData(key, cloudData) {
+            const owner = localStorage.getItem('kh_data_owner');
+            if (owner && owner !== key) studyData.days = {};
+            if (cloudData && cloudData.weekKey === getWeekKey() && cloudData.days) {
+                for (let d in cloudData.days) { studyData.days[d] = Math.max(studyData.days[d] || 0, Number(cloudData.days[d]) || 0); }
+            }
+            localStorage.setItem('kh_data_owner', key);
+            saveDataLocal();
+        }
+
         // تسجيل الدخول: لحساب موجود فقط، منفصل تماماً عن إنشاء حساب وعن تغيير كلمة المرور
         async function loginUser() {
+            if (authBusy) return;
             const rawName = document.getElementById('loginNameInput').value; const password = document.getElementById('loginPassInput').value;
             const cleanedName = normalizeUserName(rawName); const errorEl = document.getElementById('loginError'); const btn = document.getElementById('loginBtn');
             errorEl.innerText = '';
@@ -1258,49 +1359,72 @@
             if (!password) return errorEl.innerText = 'اكتب كلمة المرور.';
             if (!firebaseReady) return errorEl.innerText = 'تعذر الاتصال بالخادم الآن، تأكد من الإنترنت وحاول مرة أخرى.';
             const key = getUserKey(cleanedName); btn.innerText = "جاري التحقق..."; btn.disabled = true;
+            const resetBtn = () => { btn.innerText = "دخول"; btn.disabled = false; };
+            authBusy = true;
             try {
-                const passwordHash = await hashPassword(password);
-                const snap = await db.ref('users_auth/' + key).once('value');
-                btn.innerText = "دخول"; btn.disabled = false;
-                if (!snap.exists()) { errorEl.innerText = 'هذا الحساب غير موجود، جرّب تبويب "حساب جديد".'; return; }
-                const stored = snap.val();
-                const matchesHash = stored.passwordHash === passwordHash;
-                const matchesLegacy = !stored.passwordHash && stored.password === password; // حسابات قديمة كانت مخزّنة كنص واضح
-                if (!matchesHash && !matchesLegacy) { errorEl.innerText = "كلمة المرور غلط، حاول مرة ثانية."; return; }
-                if (matchesLegacy) db.ref('users_auth/' + key).set({ passwordHash }).catch(() => {});
-                finalizeLogin(cleanedName, key);
+                const snap = await db.ref('usernames/' + key).once('value');
+                const account = snap.val();
+                if (!account || !account.email) {
+                    resetBtn(); errorEl.innerText = 'هذا الحساب غير موجود. إذا كان عندك حساب قبل التحديث، سوّ حساب جديد من تبويب "حساب جديد" (وقتك المحفوظ بجهازك يرجع وياه).';
+                    return;
+                }
+                const hadSession = !!auth.currentUser;
+                await releasePresence();
+                try {
+                    await auth.signInWithEmailAndPassword(account.email, password);
+                } catch (err) {
+                    resetBtn(); errorEl.innerText = authErrorMessage(err, 'كلمة المرور غلط، حاول مرة ثانية.');
+                    if (hadSession && auth.currentUser) setupPresence(); // الدخول فشل والحساب الحالي باقي، نرجع حالته
+                    return;
+                }
+                resetBtn(); finalizeLogin(account.name || cleanedName, key);
             } catch (err) {
-                btn.innerText = "دخول"; btn.disabled = false; errorEl.innerText = "خطأ بالاتصال، تأكد من الإنترنت.";
+                resetBtn(); errorEl.innerText = authErrorMessage(err, 'خطأ بالاتصال، تأكد من الإنترنت.');
+            } finally {
+                authBusy = false;
             }
         }
 
         // إنشاء حساب جديد فقط، يفشل برسالة واضحة لو الاسم محجوز (بدون اللجوء التلقائي لتسجيل الدخول)
         async function signupUser() {
+            if (authBusy) return;
             const rawName = document.getElementById('signupNameInput').value;
             const password = document.getElementById('signupPassInput').value;
             const confirmPw = document.getElementById('signupConfirmInput').value;
             const cleanedName = normalizeUserName(rawName); const errorEl = document.getElementById('signupError'); const btn = document.getElementById('signupBtn');
             errorEl.innerText = '';
+            if (hasUnsupportedNameChars(rawName)) return errorEl.innerText = 'الاسم يقبل حروف عربية أو كوردية أو إنكليزية وأرقام بس، بدون رموز أو إيموجي.';
             if (cleanedName.length < 3) return errorEl.innerText = 'الاسم لازم يكون 3 أحرف أو أكثر.';
             if (containsBannedWord(cleanedName)) return errorEl.innerText = 'هذا الاسم غير مسموح، اختر اسم محترم 🙏';
-            if (password.length < 4) return errorEl.innerText = 'كلمة المرور لازم تكون 4 رموز على الأقل.';
+            if (password.length < MIN_PASSWORD_LENGTH) return errorEl.innerText = `كلمة المرور لازم تكون ${MIN_PASSWORD_LENGTH} رموز على الأقل.`;
             if (password !== confirmPw) return errorEl.innerText = 'كلمتا المرور غير متطابقتين.';
             if (!firebaseReady) return errorEl.innerText = 'تعذر الاتصال بالخادم الآن، تأكد من الإنترنت وحاول مرة أخرى.';
             const key = getUserKey(cleanedName); btn.innerText = "جاري الإنشاء..."; btn.disabled = true;
+            const resetBtn = () => { btn.innerText = "إنشاء الحساب"; btn.disabled = false; };
+            const takenMsg = 'هذا الاسم محجوز، جرّب اسم آخر أو سجّل الدخول.';
+            authBusy = true;
             try {
-                const snap = await db.ref('users_auth/' + key).once('value');
-                btn.innerText = "إنشاء الحساب"; btn.disabled = false;
-                if (snap.exists()) { errorEl.innerText = 'هذا الاسم محجوز، جرّب اسم آخر أو سجّل الدخول.'; return; }
-                const passwordHash = await hashPassword(password);
-                await db.ref('users_auth/' + key).set({ passwordHash });
-                finalizeLogin(cleanedName, key);
+                const snap = await db.ref('usernames/' + key).once('value');
+                if (snap.exists()) { resetBtn(); errorEl.innerText = takenMsg; return; }
+                await claimUsername(cleanedName, key, password);
+                resetBtn(); finalizeLogin(cleanedName, key);
             } catch (err) {
-                btn.innerText = "إنشاء الحساب"; btn.disabled = false; errorEl.innerText = "خطأ بالاتصال، تأكد من الإنترنت.";
+                resetBtn();
+                let msg = authErrorMessage(err, 'خطأ بالاتصال، تأكد من الإنترنت.');
+                if (isPermissionDenied(err)) {
+                    const taken = await db.ref('usernames/' + key).once('value').then(s => s.exists()).catch(() => false);
+                    msg = taken ? takenMsg : 'تعذر إنشاء حساب بهذا الاسم، جرّب اسم ثاني.';
+                }
+                errorEl.innerText = msg;
+                if (auth.currentUser && uNameKey) setupPresence();
+            } finally {
+                authBusy = false;
             }
         }
 
         // تغيير كلمة المرور لحساب مسجَّل دخوله حالياً، منفصل بالكامل عن تسجيل الدخول وإنشاء الحساب
         async function submitChangePassword() {
+            if (authBusy) return;
             const currentPw = document.getElementById('currentPassInput').value;
             const newPw = document.getElementById('newPassInput').value;
             const confirmPw = document.getElementById('newPassConfirmInput').value;
@@ -1309,60 +1433,74 @@
 
             if (!uNameKey) return errorEl.innerText = 'سجّل الدخول أولاً.';
             if (!currentPw) return errorEl.innerText = 'اكتب كلمة المرور الحالية.';
-            if (newPw.length < 4) return errorEl.innerText = 'كلمة المرور الجديدة لازم تكون 4 رموز على الأقل.';
+            if (newPw.length < MIN_PASSWORD_LENGTH) return errorEl.innerText = `كلمة المرور الجديدة لازم تكون ${MIN_PASSWORD_LENGTH} رموز على الأقل.`;
             if (newPw !== confirmPw) return errorEl.innerText = 'كلمتا المرور الجديدتان غير متطابقتين.';
             if (newPw === currentPw) return errorEl.innerText = 'كلمة المرور الجديدة لازم تختلف عن الحالية.';
             if (!firebaseReady) return errorEl.innerText = 'تعذر الاتصال بالخادم الآن، تأكد من الإنترنت وحاول مرة أخرى.';
+            const user = auth.currentUser;
+            if (!user || !user.email) return errorEl.innerText = 'انتهت الجلسة، سجّل الدخول من جديد.';
 
+            const resetBtn = () => { btn.innerText = "حفظ كلمة المرور"; btn.disabled = false; };
             btn.innerText = "جاري الحفظ..."; btn.disabled = true;
+            authBusy = true;
             try {
-                const currentHash = await hashPassword(currentPw);
-                const snap = await db.ref('users_auth/' + uNameKey).once('value');
-                if (!snap.exists()) { btn.innerText = "حفظ كلمة المرور"; btn.disabled = false; errorEl.innerText = 'تعذر العثور على حسابك.'; return; }
-                const stored = snap.val();
-                const matchesHash = stored.passwordHash === currentHash;
-                const matchesLegacy = !stored.passwordHash && stored.password === currentPw;
-                if (!matchesHash && !matchesLegacy) { btn.innerText = "حفظ كلمة المرور"; btn.disabled = false; errorEl.innerText = 'كلمة المرور الحالية غلط.'; return; }
-                const newHash = await hashPassword(newPw);
-                await db.ref('users_auth/' + uNameKey).set({ passwordHash: newHash });
-                btn.innerText = "حفظ كلمة المرور"; btn.disabled = false;
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPw);
+                try { await user.reauthenticateWithCredential(credential); }
+                catch (err) { resetBtn(); errorEl.innerText = authErrorMessage(err, 'كلمة المرور الحالية غلط.'); return; }
+                await user.updatePassword(newPw);
+                resetBtn();
                 errorEl.classList.add('success-text'); errorEl.innerText = 'تم تغيير كلمة المرور بنجاح ✅';
                 setTimeout(() => { closeChangePassModal(); errorEl.classList.remove('success-text'); }, 1300);
             } catch (err) {
-                btn.innerText = "حفظ كلمة المرور"; btn.disabled = false; errorEl.innerText = "خطأ بالاتصال، تأكد من الإنترنت.";
+                resetBtn(); errorEl.innerText = authErrorMessage(err, 'خطأ بالاتصال، تأكد من الإنترنت.');
+            } finally {
+                authBusy = false;
             }
         }
 
         function finalizeLogin(cleanedName, key) {
-            const oldKey = uNameKey;
-            if (oldKey && oldKey !== key) {
-                db.ref(`leaderboard_weeks/${getWeekKey()}/${oldKey}`).remove().catch(() => {});
-                if (myPresenceRef) myPresenceRef.remove();
-            }
-            uName = cleanedName; uNameKey = key; 
-            localStorage.setItem('kh_name', uName); 
+            uName = cleanedName; uNameKey = key;
+            localStorage.setItem('kh_name', uName);
             localStorage.setItem('kh_name_key', uNameKey);
-            closeAuthModal(); 
+            closeAuthModal();
 
             db.ref(`users_data/${key}/studyData`).once('value', snap => {
-                if (snap.exists()) {
-                    let cloudData = snap.val();
-                    if (cloudData.weekKey === getWeekKey()) {
-                        for (let d in cloudData.days) { studyData.days[d] = Math.max(studyData.days[d] || 0, cloudData.days[d]); }
-                    }
-                }
-                saveDataLocal(); syncToFirebase(); setupPresence(); openLeaderboard();
-            }).catch(() => { saveDataLocal(); syncToFirebase(); setupPresence(); openLeaderboard(); });
+                mergeCloudStudyData(key, snap.val());
+                syncToFirebase(); setupPresence(); openLeaderboard();
+            }).catch(() => { mergeCloudStudyData(key, null); syncToFirebase(); setupPresence(); openLeaderboard(); });
         }
 
+        let presenceListenerAttached = false;
         function setupPresence() {
-            if (!firebaseReady || !uNameKey) return;
-            const connectedRef = db.ref('.info/connected');
-            if (myPresenceRef) myPresenceRef.off();
+            if (!firebaseReady || !uNameKey || !auth.currentUser) return;
             myPresenceRef = db.ref(`online_users/${uNameKey}`);
-            connectedRef.on('value', (snap) => { if (snap.val() === true) { myPresenceRef.set(true); myPresenceRef.onDisconnect().remove(); } }, () => {});
+            if (presenceListenerAttached) { myPresenceRef.set(true).catch(() => {}); myPresenceRef.onDisconnect().remove(); return; }
+            presenceListenerAttached = true;
+            db.ref('.info/connected').on('value', (snap) => {
+                if (snap.val() === true && myPresenceRef && auth.currentUser) { myPresenceRef.set(true).catch(() => {}); myPresenceRef.onDisconnect().remove(); }
+            }, () => {});
         }
 
+        // عند فتح الصفحة، أو لما تبويب ثاني يسجل دخول: نتأكد أن الحساب المحفوظ فعلاً مالك الاسم.
+        // ما نسجل خروج من هنا أبداً، حتى تبويب مفتوح ثاني ما يطلّع المستخدم من حسابه.
+        if (firebaseReady) {
+            auth.onAuthStateChanged(async user => {
+                if (authBusy) return;
+                if (!user) { if (uNameKey) clearLocalSession(); return; }
+                const key = localStorage.getItem('kh_name_key') || uNameKey; // التبويبات تتشارك localStorage
+                if (!key) return;
+                try {
+                    const snap = await db.ref('usernames/' + key).once('value');
+                    const account = snap.val();
+                    if (!account || account.uid !== user.uid) { if (uNameKey === key) clearLocalSession(); return; }
+                    uNameKey = key;
+                    uName = account.name || uName;
+                    const dataSnap = await db.ref(`users_data/${uNameKey}/studyData`).once('value');
+                    mergeCloudStudyData(uNameKey, dataSnap.val());
+                    syncToFirebase(); setupPresence();
+                } catch (e) {}
+            });
+        }
         if (firebaseReady) {
             db.ref('online_users').on('value', snap => {
                 const el = document.getElementById('onlineCounter'); if (el) el.innerText = `🟢 يدرسون الآن: ${snap.numChildren()}`;
@@ -1371,12 +1509,12 @@
 
         function initLeaderboard() {
             if (!firebaseReady) { alert('تعذر الاتصال بخدمة لوحة المتصدرين الآن. تأكد من الإنترنت وحاول لاحقاً.'); return; }
-            if (!uName) { openAuthModal('login'); return; }
+            if (!uName || !uNameKey || !auth.currentUser) { openAuthModal('login'); return; }
             openLeaderboard();
         }
         
         function syncToFirebase() {
-            if (!firebaseReady || !uName || !uNameKey) return;
+            if (!firebaseReady || !uName || !uNameKey || !auth.currentUser) return;
             ensureWeeklyReset(); const weekKey = getWeekKey();
             db.ref(`users_data/${uNameKey}/studyData`).set({ weekKey: weekKey, days: studyData.days || {} }).catch(() => {});
             db.ref(`leaderboard_weeks/${weekKey}/` + uNameKey).set({ name: uName, time: getWeeklyTotalSeconds(), days: getWeeklyStudyDays(), lastSeen: Date.now(), weekKey, key: uNameKey }).catch(() => {});
@@ -1394,10 +1532,12 @@
             const leaderboardRef = db.ref(`leaderboard_weeks/${getWeekKey()}`);
             if (leaderboardListener) leaderboardRef.off('value', leaderboardListener);
             leaderboardListener = leaderboardRef.orderByChild('time').on('value', snapshot => {
-                let players = []; snapshot.forEach(child => { players.push(child.val()); });
-                players = players.filter(p => p && p.name).sort((a, b) => (b.time - a.time) || (a.lastSeen - b.lastSeen));
+                let players = []; snapshot.forEach(child => { const v = child.val(); if (v && typeof v === 'object') players.push({ name: v.name, time: Math.min(Math.max(Number(v.time) || 0, 0), 691200), days: Number(v.days) || 0, lastSeen: Number(v.lastSeen) || 0, key: child.key }); });
+                // نعرض فقط الأسماء السليمة: نفس قواعد الاسم، مطابقة لمفتاحها، وبدون كلمات مسيئة (يحمي من بيانات قديمة أو مزيفة)
+                players = players.filter(p => typeof p.name === 'string' && normalizeUserName(p.name) === p.name && p.name.length >= 3 && getUserKey(p.name) === p.key && !containsBannedWord(p.name))
+                    .sort((a, b) => (b.time - a.time) || (a.lastSeen - b.lastSeen));
                 let html = ''; let myRank = -1;
-                document.getElementById('leaderboardMeta').innerHTML = `<strong>اسمك:</strong> ${uName || 'غير محدد'}<br><strong>مجموعك هذا الأسبوع:</strong> ${formatHoursLabel(getWeeklyTotalSeconds())}<br><strong>أيام الدراسة:</strong> ${getWeeklyStudyDays()} يوم`;
+                document.getElementById('leaderboardMeta').innerHTML = `<strong>اسمك:</strong> ${escapeHTML(uName) || 'غير محدد'}<br><strong>مجموعك هذا الأسبوع:</strong> ${formatHoursLabel(getWeeklyTotalSeconds())}<br><strong>أيام الدراسة:</strong> ${getWeeklyStudyDays()} يوم`;
                 players.slice(0, 10).forEach((player, index) => {
                     let rank = index + 1; let isMe = (player.key === uNameKey); if (isMe) myRank = rank;
                     let rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : ''; if (isMe) rankClass += ' user-highlight';
@@ -1674,17 +1814,7 @@
         document.getElementById('newPassInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('newPassConfirmInput').focus(); } });
         document.getElementById('newPassConfirmInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitChangePassword(); });
 
-        if (firebaseReady && uNameKey) {
-            setupPresence();
-            db.ref(`users_data/${uNameKey}/studyData`).once('value', snap => {
-                if (snap.exists()) {
-                    let cloudData = snap.val();
-                    if (cloudData.weekKey === getWeekKey()) {
-                        for (let d in cloudData.days) { studyData.days[d] = Math.max(studyData.days[d] || 0, cloudData.days[d]); } saveDataLocal();
-                    }
-                }
-            }).catch(() => {});
-        }
+        // مزامنة بيانات الحساب عند فتح الصفحة صارت داخل auth.onAuthStateChanged، بعد التأكد من هوية المستخدم
         
         window.addEventListener('beforeunload', () => { if (unsyncedSeconds > 0) { syncToFirebase(); } releaseScreenWakeLock(); });
         document.addEventListener("visibilitychange", () => {
