@@ -1138,29 +1138,54 @@
         }
 
         // === فلتر الكلمات المسيئة لمنع استخدامها كاسم حساب ===
-        // الكلمات القصيرة تنفحص ككلمة كاملة بس، حتى أسماء حقيقية مثل "خولة" و"الزبيدي" و"هاني كاظم" و"Dickson" ما تنرفض.
-        // الكلمات الطويلة تنفحص بكل مكان، حتى لو انكتبت مقطعة بمسافات.
-        const BANNED_WHOLE_WORDS = ['كس', 'نيك', 'نياك', 'زبي', 'عرص', 'خول', 'طيز', 'لوطي', 'dick', 'cock', 'cunt', 'rape', 'slut'];
+        // الكلمات القصيرة تنفحص ككلمة كاملة، أو ويا لواحق وسوابق شائعة (مثل "طيزك" و"عرصات" و"dickhead")،
+        // حتى أسماء حقيقية مثل "خولة" و"الزبيدي" و"هاني كاظم" و"Dickson" و"Hitchcock" و"Sadick" و"Rapper" و"ألكس" ما تنرفض.
+        // الكلمات الطويلة تنفحص داخل كل كلمة، وحتى لو انكتبت مقطعة بمسافات ("f u c k"، "sh it")، بدون ما نلصق كلمتين
+        // كاملات ببعض، حتى أسماء مثل "بشر مطر" و"Abbas Hitham" ما تنرفض.
+        const BANNED_SHORT_WORDS = [
+            // [الكلمة، اللواحق اللي ممكن تلتصق بيها، السوابق اللي ممكن تجي قبلها ('*' = أي حروف)]
+            ['كس', ['ك', 'ي', 'ه', 'ها', 'كم', 'هم'], []], // بدون "ال" حتى "ألكس" (Alex) ما ينرفض
+            ['نيك', ['ك', 'ه', 'ها', 'كم', 'هم'], ['ا']], // بدون "يا" حتى "يانيك" (Yannick) ما ينرفض
+            ['نياك', ['ه', 'ين', 'ات'], ['ال', 'يا']],
+            ['زبي', [], []],
+            ['عرص', ['ه', 'ات', 'ين'], ['ال', 'يا']],
+            ['خول', ['ات', 'ين'], ['ال', 'يا']], // بدون "ة" حتى "خولة" ما تنرفض
+            ['طيز', ['ك', 'ي', 'ه', 'ها', 'كم', 'هم', 'ات'], ['ال']],
+            ['لوطي', ['ه', 'ين', 'ات'], ['ال', 'يا']],
+            ['dick', ['s', 'head', 'heads', 'face'], ['big', 'super', 'my', 'ur', 'your', 'fat']], // مو أي حروف، حتى "Sadick" و"Riddick" ما تنرفض
+            ['cunt', ['s'], ['*']],
+            ['slut', ['s'], ['*']],
+            ['cock', ['s', 'sucker', 'suckers'], []],
+            ['rape', ['s', 'd'], []], // بدون "r" حتى "Rapper" ما ينرفض
+            ['rapist', ['s'], []]
+        ];
         const BANNED_NAME_FRAGMENTS = [
             'متناك', 'منيوك', 'شرموط', 'شرمط', 'قحبه', 'قحبة', 'كسمك', 'كسختك', 'نيكني',
             'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'whore', 'nigger', 'nigga', 'faggot', 'retard', 'porn', 'pussy'
         ];
-        // تطبيع النص للمقارنة فقط: يوحّد حروف عربية متشابهة، يحوّل أرقام الـ"ليتسبيك" الشائعة لحروفها،
-        // يشيل الرموز، ويقلّل تكرار الحرف (مثل "فــــــك" أو "fuuuuck") لمنع الالتفاف على الفلتر.
+        // تطبيع النص للمقارنة فقط: نفس توحيد الحروف الشبيهة اللي بمفتاح الحساب (أ/ا، ی/ي، ک/ك، ە/ه، l/i ...)،
+        // يحوّل أرقام الـ"ليتسبيك" الشائعة لحروفها، يشيل الرموز، ويقلّل تكرار الحرف (مثل "فــــــك" أو "fuuuuck").
         function normalizeForBadWordCheck(str) {
-            return (str || '')
-                .toLowerCase()
-                .replace(/[ً-ٰٟ]/g, '')
-                .replace(/[إأآا]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
-                .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't').replace(/\$/g, 's').replace(/@/g, 'a')
+            let s = String(str || '').toLowerCase().replace(/[ً-ٰٟ]/g, '');
+            KEY_FOLDS.forEach(([from, to]) => { if (from !== ' ') s = s.split(from).join(to); });
+            return s.replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+                .replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't').replace(/\$/g, 's').replace(/@/g, 'a')
                 .replace(/[^a-z؀-ۿ]/g, '')
                 .replace(/(.)\1+/g, '$1');
         }
+        // القوائم تتطبّع مرة وحدة بس، لأن الفحص يشتغل على كل صف باللوحة. كل شكل (سابقة + كلمة + لاحقة) يتطبّع كامل
+        // مثل النص المكتوب، حتى تقليل الحروف المكررة (مثل "نيك"+"كم") ما يخلي الشكل يفلت.
+        const BANNED_WORD_RE = new RegExp('^(?:' + BANNED_SHORT_WORDS.flatMap(([word, suffixes, prefixes]) => {
+            const forms = [word, ...suffixes.map(e => word + e)];
+            if (prefixes.includes('*')) return forms.map(f => '[a-z]*' + normalizeForBadWordCheck(f));
+            return ['', ...prefixes].flatMap(pre => forms.map(f => normalizeForBadWordCheck(pre + f)));
+        }).join('|') + ')$');
+        const BANNED_FRAGMENTS_NORMALIZED = BANNED_NAME_FRAGMENTS.map(normalizeForBadWordCheck);
         function containsBannedWord(name) {
-            const words = String(name || '').split(/\s+/).map(normalizeForBadWordCheck).filter(Boolean);
-            const joined = words.join('');
-            return words.some(w => BANNED_WHOLE_WORDS.some(b => w === normalizeForBadWordCheck(b)))
-                || BANNED_NAME_FRAGMENTS.some(b => joined.includes(normalizeForBadWordCheck(b)));
+            const words = String(name || '').split(/[\s_]+/).map(normalizeForBadWordCheck).filter(Boolean);
+            const pieces = []; // كلمة من حرف أو حرفين تنلصق بجارتها
+            words.forEach((w, i) => { if (i > 0 && Math.min(w.length, words[i - 1].length) <= 2) pieces[pieces.length - 1] += w; else pieces.push(w); });
+            return words.concat(pieces).some(w => BANNED_WORD_RE.test(w)) || pieces.some(w => BANNED_FRAGMENTS_NORMALIZED.some(b => w.includes(b)));
         }
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
@@ -1277,7 +1302,7 @@
         function closeAllModals() {
             ['authModal', 'changePassModal', 'leaderboardModal', 'surrenderConfirmModal', 'evaluationModal', 'customTimerModal', 'ambientModal'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('overlay').style.display = 'none';
-            if (firebaseReady && leaderboardListener) db.ref(`leaderboard_weeks/${getWeekKey()}`).off('value', leaderboardListener);
+            if (firebaseReady) detachLeaderboard();
             document.getElementById('sidebar').classList.remove('active');
         }
 
@@ -1301,6 +1326,10 @@
             if (code === 'auth/too-many-requests') return 'محاولات كثيرة، انتظر شوية وحاول مرة ثانية.';
             if (code === 'auth/network-request-failed') return 'خطأ بالاتصال، تأكد من الإنترنت.';
             if (code === 'auth/operation-not-allowed' || code === 'auth/invalid-api-key' || code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') return 'خدمة الحسابات غير مفعّلة حالياً، حاول لاحقاً.';
+            if (code === 'auth/weak-password' || code === 'auth/password-does-not-meet-requirements') return 'كلمة المرور ضعيفة، اختار وحدة أطول بيها حروف وأرقام.';
+            if (code === 'auth/user-disabled') return 'هذا الحساب موقوف.';
+            if (code === 'auth/requires-recent-login' || code === 'auth/user-token-expired') return 'انتهت الجلسة، سجّل الدخول من جديد وحاول مرة ثانية.';
+            if (code === 'auth/email-already-in-use' || code === 'auth/invalid-email') return 'صار خطأ بإنشاء الحساب، حاول مرة ثانية.';
             return fallback;
         }
 
@@ -1317,6 +1346,7 @@
         }
 
         // ينشئ حساب Auth جديد ويحجز الاسم له بنسخة Firebase جانبية، حتى إذا فشل الإنشاء يبقى الحساب الحالي مسجل دخول.
+        // الاسم وفهرسه (uid_names) ينكتبون بنفس العملية، والقواعد تسمح باسم واحد بس لكل حساب.
         // إذا الاسم انحجز بنفس اللحظة، نمسح حساب Auth الجديد حتى ما يبقى حساب يتيم. بعد النجاح نسجل دخول بالحساب الجديد.
         async function claimUsername(cleanedName, key, password) {
             const signupApp = firebase.initializeApp(firebaseConfig, 'signup-' + Date.now());
@@ -1325,28 +1355,82 @@
                 await sAuth.setPersistence(firebase.auth.Auth.Persistence.NONE);
                 const cred = await sAuth.createUserWithEmailAndPassword(randomAuthEmail(), password);
                 try {
-                    await sDb.ref('usernames/' + key).set({ uid: cred.user.uid, email: cred.user.email, name: cleanedName });
+                    await sDb.ref().update({ ['usernames/' + key]: { uid: cred.user.uid, email: cred.user.email, name: cleanedName }, ['uid_names/' + cred.user.uid]: key });
                 } catch (err) {
                     await cred.user.delete().catch(() => {});
                     throw err;
                 }
                 await releasePresence();
-                await auth.signInWithEmailAndPassword(cred.user.email, password);
+                try { await auth.signInWithEmailAndPassword(cred.user.email, password); }
+                catch (err) { err.accountCreated = true; throw err; } // الحساب انسوى والاسم انحجز، بس الدخول فشل
             } finally {
                 signupApp.delete().catch(() => {});
             }
         }
 
-        // بيانات الدراسة بالجهاز تخص آخر حساب سجل دخول عليه. إذا جهاز مشترك وانبدل الحساب، ما ننقل ساعات حساب لحساب ثاني.
+        // بيانات الدراسة بالجهاز تخص آخر حساب سجل دخول عليه (kh_data_owner). إذا جهاز مشترك وانبدل الحساب، ما ننقل ساعات حساب لحساب ثاني:
+        // نخلي ساعات الحساب القديم على جنب (حتى اللي ما لحقت تنرفع) ونرجعها له أول ما يرجع يسجل دخول بنفس الأسبوع.
         // أول دخول على الجهاز (أو أول حساب بعد التحديث) يدمج ساعات الجهاز ويا الحساب، حتى وقت الطالب ما يضيع.
-        function mergeCloudStudyData(key, cloudData) {
+        function mergeDays(days) {
+            for (const d in days) studyData.days[d] = Math.max(studyData.days[d] || 0, Number(days[d]) || 0);
+        }
+        function stashDays(owner, weekKey, days) {
+            try {
+                const kept = JSON.parse(localStorage.getItem('kh_days_' + owner) || 'null');
+                const merged = Object.assign({}, kept && kept.weekKey === weekKey ? kept.days : {});
+                for (const d in days || {}) merged[d] = Math.max(merged[d] || 0, Number(days[d]) || 0);
+                localStorage.setItem('kh_days_' + owner, JSON.stringify({ weekKey, days: merged }));
+            } catch (e) {}
+        }
+        // إذا تبويب ثاني بدّل الحساب على نفس الجهاز، ساعات هذا التبويب بالذاكرة تخص الحساب القديم:
+        // نخليها على جنب لصاحبها وناخذ ساعات الجهاز الحالية، بدل ما نكتبها فوق ساعات الحساب الجديد.
+        // ساعات الضيف (قبل أي تسجيل دخول بالجهاز) تنضم لأول حساب يسجل بالجهاز، حتى لو التايمر كان شغال بتبويب ثاني.
+        function followDeviceOwner() {
             const owner = localStorage.getItem('kh_data_owner');
-            if (owner && owner !== key) studyData.days = {};
-            if (cloudData && cloudData.weekKey === getWeekKey() && cloudData.days) {
-                for (let d in cloudData.days) { studyData.days[d] = Math.max(studyData.days[d] || 0, Number(cloudData.days[d]) || 0); }
+            if (!owner || owner === tabDataOwner) return;
+            const mine = { weekKey: studyData.weekKey, days: studyData.days || {} };
+            if (tabDataOwner) stashDays(tabDataOwner, mine.weekKey, mine.days);
+            try { const stored = JSON.parse(localStorage.getItem('khulasa_study_data')); if (stored && stored.days) { studyData.weekKey = stored.weekKey || studyData.weekKey; studyData.days = stored.days; } } catch (e) {}
+            if (!tabDataOwner && mine.weekKey === studyData.weekKey) { mergeDays(mine.days); localStorage.setItem('khulasa_study_data', JSON.stringify(studyData)); }
+            tabDataOwner = owner;
+        }
+        function adoptDeviceData(key) {
+            followDeviceOwner();
+            const owner = localStorage.getItem('kh_data_owner');
+            if (owner === key) { tabDataOwner = key; return; }
+            ensureWeeklyReset();
+            if (owner) {
+                stashDays(owner, studyData.weekKey, studyData.days);
+                studyData.days = {};
+            } else {
+                // ساعات ضيف من تبويب ثاني محفوظة بالجهاز وممكن أحدث من ذاكرة هذا التبويب
+                try { const stored = JSON.parse(localStorage.getItem('khulasa_study_data')); if (stored && stored.weekKey === studyData.weekKey && stored.days) mergeDays(stored.days); } catch (e) {}
             }
-            localStorage.setItem('kh_data_owner', key);
+            try {
+                const kept = JSON.parse(localStorage.getItem('kh_days_' + key) || 'null');
+                if (kept && kept.weekKey === studyData.weekKey && kept.days) mergeDays(kept.days);
+            } catch (e) {}
+            localStorage.removeItem('kh_days_' + key);
+            localStorage.setItem('kh_data_owner', key); tabDataOwner = key;
             saveDataLocal();
+        }
+
+        // قبل أول مزامنة لكل حساب نقرا ساعاته المحفوظة بالسحابة وندمجها، حتى ما نكتب فوق ساعات من جهاز ثاني.
+        // إذا القراءة فشلت ما نكتب شي، ونعيد المحاولة بالمزامنة الجاية.
+        let cloudMergedKey = null, cloudLoadingKey = null;
+        function loadCloudStudyData(key) {
+            if (cloudLoadingKey === key) return;
+            cloudLoadingKey = key;
+            db.ref(`users_data/${key}/studyData`).once('value').then(snap => {
+                followDeviceOwner();
+                if (uNameKey !== key || tabDataOwner !== key) return;
+                const cloudData = snap.val();
+                ensureWeeklyReset();
+                if (cloudData && cloudData.weekKey === studyData.weekKey && cloudData.days) mergeDays(cloudData.days);
+                saveDataLocal();
+                cloudMergedKey = key;
+                syncToFirebase();
+            }).catch(() => {}).finally(() => { if (cloudLoadingKey === key) cloudLoadingKey = null; });
         }
 
         // تسجيل الدخول: لحساب موجود فقط، منفصل تماماً عن إنشاء حساب وعن تغيير كلمة المرور
@@ -1410,6 +1494,13 @@
                 resetBtn(); finalizeLogin(cleanedName, key);
             } catch (err) {
                 resetBtn();
+                if (err && err.accountCreated) {
+                    switchAuthTab('login');
+                    document.getElementById('loginNameInput').value = cleanedName; document.getElementById('loginPassInput').value = '';
+                    document.getElementById('loginError').innerText = 'انسوى حسابك بس صار خطأ بتسجيل الدخول. سجّل الدخول بنفس الاسم وكلمة المرور.';
+                    if (auth.currentUser && uNameKey) setupPresence();
+                    return;
+                }
                 let msg = authErrorMessage(err, 'خطأ بالاتصال، تأكد من الإنترنت.');
                 if (isPermissionDenied(err)) {
                     const taken = await db.ref('usernames/' + key).once('value').then(s => s.exists()).catch(() => false);
@@ -1463,11 +1554,9 @@
             localStorage.setItem('kh_name', uName);
             localStorage.setItem('kh_name_key', uNameKey);
             closeAuthModal();
-
-            db.ref(`users_data/${key}/studyData`).once('value', snap => {
-                mergeCloudStudyData(key, snap.val());
-                syncToFirebase(); setupPresence(); openLeaderboard();
-            }).catch(() => { mergeCloudStudyData(key, null); syncToFirebase(); setupPresence(); openLeaderboard(); });
+            adoptDeviceData(key);
+            cloudMergedKey = null; // syncToFirebase يقرا ساعات السحابة ويدمجها قبل أول كتابة
+            syncToFirebase(); setupPresence(); openLeaderboard();
         }
 
         let presenceListenerAttached = false;
@@ -1481,24 +1570,29 @@
             }, () => {});
         }
 
-        // عند فتح الصفحة، أو لما تبويب ثاني يسجل دخول: نتأكد أن الحساب المحفوظ فعلاً مالك الاسم.
-        // ما نسجل خروج من هنا أبداً، حتى تبويب مفتوح ثاني ما يطلّع المستخدم من حسابه.
+        // عند فتح الصفحة، أو لما تبويب ثاني يسجل دخول: ناخذ الاسم من حساب Firebase المسجل فعلاً (uid_names)،
+        // فكل التبويبات تتبع نفس الحساب. ما نسجل خروج من هنا أبداً، حتى تبويب مفتوح ثاني ما يطلّع المستخدم من حسابه.
+        async function followAuthUser(user, attempt = 0) {
+            try {
+                const key = (await db.ref('uid_names/' + user.uid).once('value')).val();
+                const account = key ? (await db.ref('usernames/' + key).once('value')).val() : null;
+                if (authBusy || !auth.currentUser || auth.currentUser.uid !== user.uid) return; // انبدل الحساب أثناء الانتظار
+                if (!account || account.uid !== user.uid) { if (uNameKey) clearLocalSession(); return; }
+                if (key !== uNameKey) cloudMergedKey = null;
+                uNameKey = key; uName = account.name || uName;
+                localStorage.setItem('kh_name', uName); localStorage.setItem('kh_name_key', uNameKey);
+                adoptDeviceData(key);
+                syncToFirebase(); setupPresence();
+            } catch (e) {
+                // القراءة فشلت: نعيد المحاولة ما دام نفس الحساب مسجل
+                if (attempt < 5) setTimeout(() => { if (!authBusy && auth.currentUser && auth.currentUser.uid === user.uid) followAuthUser(user, attempt + 1); }, 5000);
+            }
+        }
         if (firebaseReady) {
-            auth.onAuthStateChanged(async user => {
+            auth.onAuthStateChanged(user => {
                 if (authBusy) return;
                 if (!user) { if (uNameKey) clearLocalSession(); return; }
-                const key = localStorage.getItem('kh_name_key') || uNameKey; // التبويبات تتشارك localStorage
-                if (!key) return;
-                try {
-                    const snap = await db.ref('usernames/' + key).once('value');
-                    const account = snap.val();
-                    if (!account || account.uid !== user.uid) { if (uNameKey === key) clearLocalSession(); return; }
-                    uNameKey = key;
-                    uName = account.name || uName;
-                    const dataSnap = await db.ref(`users_data/${uNameKey}/studyData`).once('value');
-                    mergeCloudStudyData(uNameKey, dataSnap.val());
-                    syncToFirebase(); setupPresence();
-                } catch (e) {}
+                followAuthUser(user);
             });
         }
         if (firebaseReady) {
@@ -1513,14 +1607,59 @@
             openLeaderboard();
         }
         
-        function syncToFirebase() {
-            if (!firebaseReady || !uName || !uNameKey || !auth.currentUser) return;
-            ensureWeeklyReset(); const weekKey = getWeekKey();
-            db.ref(`users_data/${uNameKey}/studyData`).set({ weekKey: weekKey, days: studyData.days || {} }).catch(() => {});
-            db.ref(`leaderboard_weeks/${weekKey}/` + uNameKey).set({ name: uName, time: getWeeklyTotalSeconds(), days: getWeeklyStudyDays(), lastSeen: Date.now(), weekKey, key: uNameKey }).catch(() => {});
+        // ===== منع الغش بلوحة المتصدرين =====
+        // القواعد على الخادم (database.rules.json) تقارن كل يوم بساعة الخادم نفسه، مو بساعة جهاز الطالب:
+        // ما يقدر يسجل وقت بيوم ما وصله بعد، ولا أكثر من الوقت اللي فعلاً مضى من اليوم، ولا أكثر من 16 ساعة باليوم.
+        // فحتى لو أحد عدّل الكود من Inspect أو غيّر ساعة جهازه، أقصى شي يوصله هو الوقت الحقيقي اللي مضى.
+        const BOARD_TZ_OFFSET_MS = 3 * 3600000; // توقيت العراق (+3، بدون توقيت صيفي)
+        const BOARD_DAY_MS = 86400000;
+        const BOARD_MAX_DAY_SECONDS = 16 * 3600; // نفس الحد بالقواعد
+        // فرق ساعة الجهاز عن الخادم ينحفظ بين الزيارات، حتى أول لحظة بعد فتح الصفحة تستخدم الوقت الصحيح
+        const savedServerOffset = localStorage.getItem('kh_server_offset');
+        let serverTimeOffset = Number(savedServerOffset) || 0;
+        let serverTimeKnown = savedServerOffset !== null || !firebaseReady; // بدون Firebase ما عدنا غير ساعة الجهاز
+        if (firebaseReady) db.ref('.info/serverTimeOffset').on('value', snap => {
+            if (snap.val() === null) return;
+            serverTimeOffset = Number(snap.val()) || 0; serverTimeKnown = true;
+            try { localStorage.setItem('kh_server_offset', String(serverTimeOffset)); } catch (e) {}
+        }, () => {});
+        function serverNow() { return Date.now() + serverTimeOffset; }
+
+        // بداية أسبوع اللوحة: الجمعة الساعة 12 بالليل بتوقيت العراق، محسوبة من ساعة الخادم
+        function getBoardWeekStart() {
+            const day = Math.floor((serverNow() + BOARD_TZ_OFFSET_MS) / BOARD_DAY_MS);
+            return (day - ((day + 6) % 7)) * BOARD_DAY_MS - BOARD_TZ_OFFSET_MS;
         }
 
-        let leaderboardListener = null;
+        // مسار أسبوع اللوحة (تاريخ الجمعة) من نفس ساعة الخادم وتوقيت العراق، حتى كل الأجهزة تكتب وتقرا نفس المسار مهما كان توقيت الجهاز
+        function getBoardWeekKey(weekStart = getBoardWeekStart()) { return new Date(weekStart + BOARD_TZ_OFFSET_MS).toISOString().slice(0, 10); }
+
+        // يحوّل ساعات الجهاز لسبعة أيام (d0 = الجمعة ... d6 = الخميس)، وكل يوم محدود بنفس حدود القواعد
+        function getBoardDays(weekStart = getBoardWeekStart()) {
+            const elapsedSecs = Math.max(0, (serverNow() - weekStart) / 1000);
+            const d = [0, 0, 0, 0, 0, 0, 0];
+            Object.entries(studyData.days || {}).forEach(([dateKey, secs]) => {
+                const idx = Math.round((Date.parse(dateKey + 'T00:00:00+03:00') - weekStart) / BOARD_DAY_MS);
+                if (idx >= 0 && idx < 7) d[idx] += Math.max(0, Number(secs) || 0);
+            });
+            return d.map((secs, k) => Math.floor(Math.min(secs, BOARD_MAX_DAY_SECONDS, Math.max(0, elapsedSecs - k * 86400))));
+        }
+
+        function syncToFirebase() {
+            if (!firebaseReady || !uName || !uNameKey || !auth.currentUser) return;
+            followDeviceOwner();
+            if (tabDataOwner !== uNameKey) return; // ساعات هذا التبويب تخص حساب ثاني، ننتظر لحد ما يتبع الحساب الحالي
+            if (cloudMergedKey !== uNameKey) { loadCloudStudyData(uNameKey); return; }
+            ensureWeeklyReset();
+            db.ref(`users_data/${uNameKey}/studyData`).set({ weekKey: studyData.weekKey, days: studyData.days || {} }).catch(() => {});
+            const weekStart = getBoardWeekStart(); const boardWeekKey = getBoardWeekKey(weekStart); const d = getBoardDays(weekStart);
+            const row = { name: uName, time: d[0] + d[1] + d[2] + d[3] + d[4] + d[5] + d[6], days: d.filter(x => x > 0).length, lastSeen: firebase.database.ServerValue.TIMESTAMP, weekKey: boardWeekKey, key: uNameKey, weekStart };
+            d.forEach((secs, k) => { row['d' + k] = secs; });
+            db.ref(`leaderboard_weeks/${boardWeekKey}/` + uNameKey).set(row).catch(() => {});
+        }
+
+        let leaderboardListener = null, leaderboardQuery = null;
+        function detachLeaderboard() { if (leaderboardQuery && leaderboardListener) leaderboardQuery.off('value', leaderboardListener); leaderboardQuery = null; leaderboardListener = null; }
         function openLeaderboard() {
             document.getElementById('leaderboardModal').style.display = 'block'; document.getElementById('overlay').style.display = 'block';
             if (!firebaseReady) {
@@ -1529,15 +1668,16 @@
                 return;
             }
             ensureWeeklyReset();
-            const leaderboardRef = db.ref(`leaderboard_weeks/${getWeekKey()}`);
-            if (leaderboardListener) leaderboardRef.off('value', leaderboardListener);
-            leaderboardListener = leaderboardRef.orderByChild('time').on('value', snapshot => {
-                let players = []; snapshot.forEach(child => { const v = child.val(); if (v && typeof v === 'object') players.push({ name: v.name, time: Math.min(Math.max(Number(v.time) || 0, 0), 691200), days: Number(v.days) || 0, lastSeen: Number(v.lastSeen) || 0, key: child.key }); });
+            detachLeaderboard();
+            leaderboardQuery = db.ref(`leaderboard_weeks/${getBoardWeekKey()}`).orderByChild('time');
+            leaderboardListener = leaderboardQuery.on('value', snapshot => {
+                const boardWeekStart = getBoardWeekStart(); const myDays = getBoardDays(boardWeekStart);
+                let players = []; snapshot.forEach(child => { const v = child.val(); if (v && typeof v === 'object' && v.weekStart === boardWeekStart) players.push({ name: v.name, time: Math.min(Math.max(Number(v.time) || 0, 0), 7 * 57600), days: [0, 1, 2, 3, 4, 5, 6].filter(k => Number(v['d' + k]) > 0).length, lastSeen: Number(v.lastSeen) || 0, key: child.key }); });
                 // نعرض فقط الأسماء السليمة: نفس قواعد الاسم، مطابقة لمفتاحها، وبدون كلمات مسيئة (يحمي من بيانات قديمة أو مزيفة)
                 players = players.filter(p => typeof p.name === 'string' && normalizeUserName(p.name) === p.name && p.name.length >= 3 && getUserKey(p.name) === p.key && !containsBannedWord(p.name))
                     .sort((a, b) => (b.time - a.time) || (a.lastSeen - b.lastSeen));
                 let html = ''; let myRank = -1;
-                document.getElementById('leaderboardMeta').innerHTML = `<strong>اسمك:</strong> ${escapeHTML(uName) || 'غير محدد'}<br><strong>مجموعك هذا الأسبوع:</strong> ${formatHoursLabel(getWeeklyTotalSeconds())}<br><strong>أيام الدراسة:</strong> ${getWeeklyStudyDays()} يوم`;
+                document.getElementById('leaderboardMeta').innerHTML = `<strong>اسمك:</strong> ${escapeHTML(uName) || 'غير محدد'}<br><strong>مجموعك هذا الأسبوع:</strong> ${formatHoursLabel(myDays.reduce((a, b) => a + b, 0))}<br><strong>أيام الدراسة:</strong> ${myDays.filter(x => x > 0).length} يوم`;
                 players.slice(0, 10).forEach((player, index) => {
                     let rank = index + 1; let isMe = (player.key === uNameKey); if (isMe) myRank = rank;
                     let rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : ''; if (isMe) rankClass += ' user-highlight';
@@ -1554,7 +1694,7 @@
                 }
             }, () => { showOfflineNotice(document.getElementById('ranksCont')); });
         }
-        function closeLeaderboard() { document.getElementById('leaderboardModal').style.display = 'none'; if (document.getElementById('authModal').style.display !== 'block') document.getElementById('overlay').style.display = 'none'; if (firebaseReady && leaderboardListener) db.ref(`leaderboard_weeks/${getWeekKey()}`).off('value', leaderboardListener); }
+        function closeLeaderboard() { document.getElementById('leaderboardModal').style.display = 'none'; if (document.getElementById('authModal').style.display !== 'block') document.getElementById('overlay').style.display = 'none'; if (firebaseReady) detachLeaderboard(); }
 
         // ===== الوضع الصباحي والليلي =====
         let flakeColor = 'rgba(255,255,255,0.3)';
@@ -1585,28 +1725,28 @@
         function anim() { ctx.clearRect(0,0,w,h); flakes.forEach(f=>{f.update(); f.draw();}); requestAnimationFrame(anim); }
         if (!reduceMotion) anim();
 
-        function formatDateKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
-        
-        function getWeekStart(date = new Date()) { const d = new Date(date); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 2) % 7)); return d; }
-        
-        function getWeekKey(date = new Date()) { return formatDateKey(getWeekStart(date)); }
+        // اليوم والأسبوع بتوقيت العراق ومن ساعة الخادم، نفس اللي تستخدمه لوحة المتصدرين،
+        // حتى جهاز توقيته أو ساعته مختلفة ما يصفّر الأسبوع قبل اللوحة أو يسجل الوقت بيوم غير يوم اللوحة.
+        function formatDateKey(ms = serverNow()) { return new Date(ms + BOARD_TZ_OFFSET_MS).toISOString().slice(0, 10); }
+        function getWeekKey() { return getBoardWeekKey(); }
         function formatSeconds(s) { return new Date(Math.max(0, s) * 1000).toISOString().slice(11, 19); }
         function formatHoursLabel(s) { return `${(s / 3600).toFixed(1)} س`; }
-        function getWeeklyTotalSeconds() { 
-            return Object.values(studyData.days || {}).reduce((sum, secs) => {
-                let safeSecs = Number(secs) || 0;
-                // منع تسجيل أكثر من 24 ساعة في اليوم الواحد (86400 ثانية)
-                if (safeSecs > 86400) safeSecs = 86400; 
-                if (safeSecs < 0) safeSecs = 0;
-                return sum + safeSecs;
-            }, 0); 
-        }
-        function getWeeklyStudyDays() { return Object.values(studyData.days || {}).filter(secs => secs > 0).length; }
 
         let studyData = JSON.parse(localStorage.getItem('khulasa_study_data')) || { weekKey: getWeekKey(), days: {}, dailyGoal: 9 };
         if (!studyData.days) studyData.days = {}; if (!studyData.weekKey) studyData.weekKey = getWeekKey(); if (!studyData.dailyGoal) studyData.dailyGoal = 9;
+        let tabDataOwner = localStorage.getItem('kh_data_owner'); // الحساب اللي تخصه الساعات اللي بذاكرة هذا التبويب
 
-        function ensureWeeklyReset() { const currentWeekKey = getWeekKey(); if (studyData.weekKey !== currentWeekKey) { studyData.weekKey = currentWeekKey; studyData.days = {}; localStorage.setItem('khulasa_study_data', JSON.stringify(studyData)); } }
+        // الأسبوع يتصفّر بس بعد ما نعرف وقت الخادم، وبس لما يجي أسبوع جديد. إذا الأسبوع المحفوظ "بالمستقبل" (انحفظ من ساعة جهاز غلط)
+        // نصحّح اسمه بس بدون ما نمسح الساعات، حتى ساعة جهاز غلط ما تمسح ساعات الأسبوع.
+        function ensureWeeklyReset() {
+            if (!serverTimeKnown) return;
+            followDeviceOwner();
+            const currentWeekKey = getWeekKey();
+            if (studyData.weekKey === currentWeekKey) return;
+            if (!(studyData.weekKey > currentWeekKey)) studyData.days = {};
+            studyData.weekKey = currentWeekKey;
+            localStorage.setItem('khulasa_study_data', JSON.stringify(studyData));
+        }
         function renderHistory() {
             const historyList = document.getElementById('historyList'); const entries = Object.entries(studyData.days || {}).sort((a, b) => new Date(b[0]) - new Date(a[0]));
             if (!entries.length) { historyList.innerHTML = '<li class="history-item"><span>ماكو ساعات مسجلة هذا الأسبوع</span><span>0.0 س</span></li>'; return; }
@@ -1617,7 +1757,7 @@
             studyData.days[formatDateKey()] = 0; saveDataLocal(); syncToFirebase();
         }
         
-        function saveDataLocal() { ensureWeeklyReset(); localStorage.setItem('khulasa_study_data', JSON.stringify(studyData)); updateDisplay(); }
+        function saveDataLocal() { followDeviceOwner(); ensureWeeklyReset(); localStorage.setItem('khulasa_study_data', JSON.stringify(studyData)); updateDisplay(); }
 
         const workerCode = `
             let timer;
@@ -1762,7 +1902,18 @@
             }
 
             currentSessionTotal = timeLeft; shownMilestones = new Set();
-            if (!isBreak) resetSessionQuotes(); endTime = Date.now() + (timeLeft * 1000);
+            if (!isBreak) {
+                // جلسة التركيز الجاية ما تبدي وحدها بعد الاستراحة: لازم الطالب يضغط "يلا ابدي".
+                // هيج العداد ما يكدر يحسب ساعات طول الليل إذا انترك شغال والطالب مو موجود.
+                timerWorker.postMessage('stop'); isRunning = false; isPaused = false;
+                releaseScreenWakeLock(); Ambient.onTimer('stop'); localStorage.removeItem('kh_timer_state');
+                resetSessionQuotes();
+                document.getElementById('mainBtn').style.display = "block"; document.getElementById('secControls').style.display = "none";
+                document.getElementById('pauseBtn').innerText = "إيقاف مؤقت";
+                document.getElementById('status').textContent = "الاستراحة خلصت ⏰"; document.getElementById('motivation-box').setAttribute('dir', 'rtl'); document.getElementById('motivation-box').innerText = "اضغط «يلا ابدي» حتى تبدي الجلسة الجاية";
+                updateDisplay(); return;
+            }
+            endTime = Date.now() + (timeLeft * 1000);
             document.getElementById('status').textContent = isBreak ? "استراحة ☕" : "وقت التركيز ✍️"; document.getElementById('motivation-box').setAttribute('dir', 'rtl'); document.getElementById('motivation-box').innerText = isBreak ? "خذ نفس وارجع بقوة" : "";
             saveTimerState(); startTimer(true); updateDisplay();
         }
@@ -1813,6 +1964,18 @@
         document.getElementById('currentPassInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('newPassInput').focus(); } });
         document.getElementById('newPassInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('newPassConfirmInput').focus(); } });
         document.getElementById('newPassConfirmInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitChangePassword(); });
+
+        // تصعيب فتح أدوات المطور (Inspect): يمنع الزر اليمين واختصارات الكيبورد المعروفة.
+        // هذا ردع بسيط بس، مو حماية: الحماية الحقيقية من قواعد الخادم، فحتى لو أحد فتحها ما يكدر يغش باللوحة.
+        document.addEventListener('contextmenu', e => { if (!e.target.closest('input, textarea')) e.preventDefault(); });
+        document.addEventListener('keydown', e => {
+            const k = (e.key || '').toLowerCase();
+            const devtoolsCombo = e.key === 'F12'
+                || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c', 'k'].includes(k))
+                || (e.metaKey && e.altKey && ['i', 'j', 'c', 'u'].includes(k))
+                || ((e.ctrlKey || e.metaKey) && k === 'u');
+            if (devtoolsCombo) { e.preventDefault(); e.stopPropagation(); }
+        }, true);
 
         // مزامنة بيانات الحساب عند فتح الصفحة صارت داخل auth.onAuthStateChanged، بعد التأكد من هوية المستخدم
         
