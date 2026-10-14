@@ -1588,11 +1588,17 @@
                 if (attempt < 5) setTimeout(() => { if (!authBusy && auth.currentUser && auth.currentUser.uid === user.uid) followAuthUser(user, attempt + 1); }, 5000);
             }
         }
+        // الطالب يبقى مسجل دخول على جهازه (حتى لو سكّر المتصفح) لحد ما يبدّل الحساب.
+        // Firebase يحتاج لحظة بعد فتح الصفحة حتى يرجّع الحساب المحفوظ، فننتظره قبل ما نطلب تسجيل الدخول.
+        let authRestored = !firebaseReady; const authRestoredWaiters = [];
+        function markAuthRestored() { authRestored = true; authRestoredWaiters.splice(0).forEach(r => r()); }
+        function whenAuthRestored() { return authRestored ? Promise.resolve() : new Promise(r => { authRestoredWaiters.push(r); setTimeout(r, 5000); }); }
         if (firebaseReady) {
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
             auth.onAuthStateChanged(user => {
                 if (authBusy) return;
-                if (!user) { if (uNameKey) clearLocalSession(); return; }
-                followAuthUser(user);
+                if (!user) { if (uNameKey) clearLocalSession(); markAuthRestored(); return; }
+                followAuthUser(user).finally(markAuthRestored);
             });
         }
         if (firebaseReady) {
@@ -1601,8 +1607,9 @@
             }, () => { const el = document.getElementById('onlineCounter'); if (el) el.innerText = '🔴 غير متصل بالخادم'; });
         }
 
-        function initLeaderboard() {
+        async function initLeaderboard() {
             if (!firebaseReady) { alert('تعذر الاتصال بخدمة لوحة المتصدرين الآن. تأكد من الإنترنت وحاول لاحقاً.'); return; }
+            await whenAuthRestored();
             if (!uName || !uNameKey || !auth.currentUser) { openAuthModal('login'); return; }
             openLeaderboard();
         }
